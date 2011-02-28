@@ -1,0 +1,19 @@
+table.role_model { width: 100%; }
+table.role_model th, table.role_model td { text-align: left; vertical-align: top; border: 1px solid #ddc; padding: 3px 5px; }
+table.role_model th.center { text-align: center; width: 50px; }
+/* table.role_model th.name { width: 50%; } */
+table.role_model td.checkbox { text-align: center; }
+table.role_model td.checkbox input { float: none; margin: 0; }
+table.role_model td.active { background: #fff; border-bottom: 2px solid #fff; }
+table.role_model div.sub { display: none; }
+table.role_model th span { cursor: pointer; color: #000; border-bottom: 1px dotted #888; }
+table.role_model div.sub table td.checkbox { text-align: left; }
+table.role_model div.sub td, table.role_model div.sub th { border: none; padding: 3px 0; }
+table.role_model div.sub th.name { padding-right: 50px;  }
+table.role_model div.sub td { border-top: 1px dotted #ddc; }
+table.role_model p.info { margin-top: 10px; font-style: italic; color: #999; }
+table.role_model td.required { color: #999; font-style: italic; }
+table.role_model label { padding: 3px 0; }
+table.role_model label input[type=checkbox] { float: left; }
+table.role_model div.filter { margin-bottom: 5px; display: none; }
+table.role_model div.filter input { margin-right: 0; float: none; }
