@@ -119,13 +119,13 @@
 				$row->appendChild($this->tdCheckBox('section['.$id.'][create]', $this->checkSection($id, 'create') == 1));
 				$row->appendChild($this->tdCheckBox('section['.$id.'][edit]', $this->checkSection($id, 'edit') == 1));
 				$row->appendChild($this->tdCheckBox('section['.$id.'][delete]', $this->checkSection($id, 'delete') == 1));
-				$row->appendChild(new XMLElement('td', '<a href="#" rel="fields">edit</a>', array('class'=>'checkbox')));
-				$row->appendChild(new XMLElement('td', '<a href="#" rel="entries">edit</a>', array('class'=>'checkbox')));
+				$row->appendChild(new XMLElement('td', '<a href="#" rel="fields">Edit</a>', array('class'=>'checkbox')));
+				$row->appendChild(new XMLElement('td', '<a href="#" rel="entries">Edit</a>', array('class'=>'checkbox')));
 				$tableBody[] = $row;				
 				
 				// Extra row for the fields and entries options:
 				$row = new XMLElement('tr');
-				$td  = new XMLElement('td', null, array('colspan'=>6));
+				$td  = new XMLElement('td', null, array('colspan'=>6, 'class'=>'options'));
 				$divFields = new XMLElement('div', null, array('class'=>'sub fields'));
 				$divFields->appendChild(new XMLElement('h3', __('Fields')));
 				
@@ -152,20 +152,22 @@
 					$tBody[] = $fieldRow;					
 				}
 				$divFields->appendChild(Widget::Table(Widget::TableHead($thead), null, Widget::TableBody($tBody)));
-				$divFields->appendChild(new XMLElement('p', '* : '.__('You cannot hide required fields'), array('class'=>'info')));
+				$divFields->appendChild(new XMLElement('p', '* '.__('You cannot hide required fields'), array('class'=>'info')));
 				$td->appendChild($divFields);
 				
 				// Entry options:
 				$divEntries = new XMLElement('div', null, array('class'=>'sub entries'));
-				$label = Widget::Label(__('Author is only allowed to view/edit entries he or she created'));
+				$label = Widget::Label();
 				// check if this checkbox is checked:
 				$attributes = $this->checkSection($id, 'own_entries') == 1 ? array('checked'=>'checked') : null;
-				$label->appendChild(Widget::Input('section['.$id.'][own_entries]', null, 'checkbox', $attributes));
+				$input = Widget::Input('section['.$id.'][own_entries]', null, 'checkbox', $attributes);
+				$label->setValue($input->generate() . ' ' . __('Author can view/edit own entries only'));
 				$divEntries->appendChild($label);
 				
-				$label = Widget::Label(__('Use filter'));
+				$label = Widget::Label();
 				$attributes = $this->checkSection($id, 'use_filter') == 1 ? array('checked'=>'checked') : null;
-				$label->appendChild(Widget::Input('section['.$id.'][use_filter]', null, 'checkbox', $attributes));
+				$input = Widget::Input('section['.$id.'][use_filter]', null, 'checkbox', $attributes);
+				$label->setValue($input->generate() . ' ' . __('Use filter'));
 				$divEntries->appendChild($label);
 				
 				$filterRule = new XMLElement('div', null, array('class'=>'filter'));
