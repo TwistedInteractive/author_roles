@@ -1,6 +1,6 @@
 jQuery(function(){
 	var $ = jQuery;
-	$("table.role_model a").click(function(){
+	$("table.author_roles a").click(function(){
 		var rel = $(this).attr("rel");
 		$("div.sub").slideUp();
 		$("td").removeClass("active");
@@ -10,7 +10,7 @@ jQuery(function(){
 		return false;
 	});
 	
-	$("table.role_model th span").each(function(){
+	$("table.author_roles th span").each(function(){
 		$(this).click(function(){
 			var rel = $(this).attr("rel");
 			if($("input[type=checkbox][name$='[" + rel + "]']:checked").length == 0)
@@ -22,7 +22,7 @@ jQuery(function(){
 		});		
 	});
 	
-	$("table.role_model div.entries input[name$='[use_filter]']").each(function(){
+	$("table.author_roles div.entries input[name$='[use_filter]']").each(function(){
 		if($(this).attr("checked"))
 		{
 			$("div.filter", $(this).parent().parent()).show();

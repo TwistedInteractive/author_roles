@@ -1,15 +1,15 @@
 <?php
 	require_once(TOOLKIT . '/class.administrationpage.php');
 	
-	Class contentExtensionRole_modelIndex extends AdministrationPage
+	Class contentExtensionAuthor_rolesIndex extends AdministrationPage
 	{
 		protected $_uri = null;
 		protected $_driver = null;
 		
 		function __construct(&$parent){
 			parent::__construct($parent);
-			$this->_uri = URL . '/symphony/extension/role_model/';
-			$this->_driver = Symphony::ExtensionManager()->create('role_model');
+			$this->_uri = URL . '/symphony/extension/author_roles/';
+			$this->_driver = Symphony::ExtensionManager()->create('author_roles');
 		}
 		
 		public function build($context)
@@ -37,7 +37,7 @@
 		{
 			// Set the page to display as a table:
 			$this->setPageType('table');
-			$this->appendSubheading(__('Roles'), Widget::Anchor(
+			$this->appendSubheading(__('Author Roles'), Widget::Anchor(
 				__('Create New'), $this->_uri.'roles/new/',
 				__('Create a new role'), 'create button'
 			));

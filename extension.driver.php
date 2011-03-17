@@ -1,18 +1,18 @@
 <?php
-Class extension_role_model extends Extension
+Class extension_author_roles extends Extension
 {
 	// About this extension:
 	public function about()
 	{
 		return array(
-			'name' => 'Role Model',
+			'name' => 'Author Roles',
 			'version' => '1.0',
-			'release-date' => '2011-02-09',
+			'release-date' => '2011-03-17',
 			'author' => array(
 				'name' => 'Giel Berkers',
 				'website' => 'http://www.gielberkers.com',
 				'email' => 'info@gielberkers.com'),
-			'description' => 'Roles for Symphony 2.2'
+			'description' => 'Author Roles for Symphony 2.2'
 		);
 	}
 	
@@ -70,8 +70,8 @@ Class extension_role_model extends Extension
 	{
 		// Add the roles button to the system-tab:
 		$context['navigation'][200]['children'][] = array(
-			'link'  => '/extension/role_model/',
-			'name'  => __('Roles'),
+			'link'  => '/extension/author_roles/',
+			'name'  => __('Author Roles'),
 			'limit' => 'developer'
 		);
 		
@@ -125,7 +125,7 @@ Class extension_role_model extends Extension
 		// Delete the links:
 		foreach($context as $id_author)
 		{
-			Symphony::Database()->query('DELETE FROM `tbl_roles_authors` WHERE `id_author` = '.$id_author.';');
+			Symphony::Database()->query('DELETE FROM `tbl_author_roles_authors` WHERE `id_author` = '.$id_author.';');
 		}
 	}
 	
@@ -139,7 +139,7 @@ Class extension_role_model extends Extension
 		{
 			$group = new XMLElement('fieldset');
 			$group->setAttribute('class', 'settings');
-			$group->appendChild(new XMLElement('legend', __('Role')));
+			$group->appendChild(new XMLElement('legend', __('Author Role')));
 			
 			$div = new XMLElement('div');
 			
@@ -149,7 +149,7 @@ Class extension_role_model extends Extension
 			);
 			$roles = $this->getRoles();
 			// See which role this user has:
-			$id_role = $context['author']->get('id') != false ? Symphony::Database()->fetchVar('id_role', 0, 'SELECT `id_role` FROM `tbl_roles_authors` WHERE `id_author` = '.$context['author']->get('id').';') : 0;
+			$id_role = $context['author']->get('id') != false ? Symphony::Database()->fetchVar('id_role', 0, 'SELECT `id_role` FROM `tbl_author_roles_authors` WHERE `id_author` = '.$context['author']->get('id').';') : 0;
 			foreach($roles as $role)
 			{
 				$options[] = array($role['id'], $role['id'] == $id_role, $role['name']);
@@ -553,7 +553,7 @@ Class extension_role_model extends Extension
 			if($id_role != 0)
 			{
 				// Insert new role:
-				Symphony::Database()->insert(array('id_role'=>$id_role, 'id_author'=>$id_author), 'tbl_roles_authors');
+				Symphony::Database()->insert(array('id_role'=>$id_role, 'id_author'=>$id_author), 'tbl_author_roles_authors');
 			}
 		}
 	}
@@ -564,7 +564,7 @@ Class extension_role_model extends Extension
 	 */
 	public function getRoles()
 	{
-		$roles = Symphony::Database()->fetch('SELECT * FROM `tbl_roles` ORDER BY `name` ASC');
+		$roles = Symphony::Database()->fetch('SELECT * FROM `tbl_author_roles` ORDER BY `name` ASC');
 		return $roles;
 	}
 	
@@ -582,7 +582,7 @@ Class extension_role_model extends Extension
 				A.`last_name`
 			FROM
 				`tbl_authors` A,
-				`tbl_roles_authors` B
+				`tbl_author_roles_authors` B
 			WHERE
 				B.`id_role` = '.$id_role.' AND
 				B.`id_author` = A.`id`;');
@@ -596,7 +596,7 @@ Class extension_role_model extends Extension
 	 */
 	public function getAuthorRole($id_author)
 	{
-		$id_role = Symphony::Database()->fetchVar('id_role', 0, 'SELECT `id_role` FROM `tbl_roles_authors` WHERE `id_author` = '.$id_author.';');
+		$id_role = Symphony::Database()->fetchVar('id_role', 0, 'SELECT `id_role` FROM `tbl_author_roles_authors` WHERE `id_author` = '.$id_author.';');
 		return $id_role;
 	}
 	
@@ -611,7 +611,7 @@ Class extension_role_model extends Extension
 		{
 			$data = array();
 			// The name of the role:
-			$roleResult = Symphony::Database()->fetch('SELECT * FROM `tbl_roles` WHERE `id` = '.$id_role.';');
+			$roleResult = Symphony::Database()->fetch('SELECT * FROM `tbl_author_roles` WHERE `id` = '.$id_role.';');
 			$data['name'] = $roleResult[0]['name'];
 			
 			// The associated sections:
@@ -628,7 +628,7 @@ Class extension_role_model extends Extension
 					B.`name`,
 					B.`handle`
 				FROM
-					`tbl_roles_sections` A,
+					`tbl_author_roles_sections` A,
 					`tbl_sections` B
 				WHERE
 					A.`id_role` = '.$id_role.' AND
@@ -643,7 +643,7 @@ Class extension_role_model extends Extension
 			}
 			
 			// The fields:
-			$fields = Symphony::Database()->fetch('SELECT * FROM `tbl_roles_fields` WHERE `id_role` = '.$id_role.';');
+			$fields = Symphony::Database()->fetch('SELECT * FROM `tbl_author_roles_fields` WHERE `id_role` = '.$id_role.';');
 			$data['fields'] = array();
 			foreach($fields as $field)
 			{
@@ -667,10 +667,10 @@ Class extension_role_model extends Extension
 	 */
 	public function deleteRole($id)
 	{
-		Symphony::Database()->query('DELETE FROM `tbl_roles` WHERE `id` = '.$id.';');
-		Symphony::Database()->query('DELETE FROM `tbl_roles_authors` WHERE `id_role` = '.$id.';');
-		Symphony::Database()->query('DELETE FROM `tbl_roles_sections` WHERE `id_role` = '.$id.';');
-		Symphony::Database()->query('DELETE FROM `tbl_roles_fields` WHERE `id_role` = '.$id.';');
+		Symphony::Database()->query('DELETE FROM `tbl_author_roles` WHERE `id` = '.$id.';');
+		Symphony::Database()->query('DELETE FROM `tbl_author_roles_authors` WHERE `id_role` = '.$id.';');
+		Symphony::Database()->query('DELETE FROM `tbl_author_roles_sections` WHERE `id_role` = '.$id.';');
+		Symphony::Database()->query('DELETE FROM `tbl_author_roles_fields` WHERE `id_role` = '.$id.';');
 	}
 	
 	/**
@@ -685,15 +685,15 @@ Class extension_role_model extends Extension
 		{
 			// Create the role:
 			if($values['id_role'] == 0) {
-				Symphony::Database()->insert(array('name'=>$name), 'tbl_roles');
+				Symphony::Database()->insert(array('name'=>$name), 'tbl_author_roles');
 				$id_role = Symphony::Database()->getInsertId();
 			} else {
 				$id_role = $values['id_role'];
-				Symphony::Database()->update(array('name'=>$name), 'tbl_roles', '`id` = '.$id_role);
+				Symphony::Database()->update(array('name'=>$name), 'tbl_author_roles', '`id` = '.$id_role);
 			}
 			// First delete all links in the database before new ones are created:
-			Symphony::Database()->query('DELETE FROM `tbl_roles_sections` WHERE `id_role` = '.$id_role.';');
-			Symphony::Database()->query('DELETE FROM `tbl_roles_fields` WHERE `id_role` = '.$id_role.';');
+			Symphony::Database()->query('DELETE FROM `tbl_author_roles_sections` WHERE `id_role` = '.$id_role.';');
+			Symphony::Database()->query('DELETE FROM `tbl_author_roles_fields` WHERE `id_role` = '.$id_role.';');
 			foreach($values['section'] as $id_section => $info)
 			{
 				$insert 			= array('id_role'=>$id_role, 'id_section'=>$id_section);
@@ -710,13 +710,13 @@ Class extension_role_model extends Extension
 					$insert['filter_rule'] = $info['filter_rule_type'].':'.$info['filter_rule'];
 				}
 				
-				Symphony::Database()->insert($insert, 'tbl_roles_sections');
+				Symphony::Database()->insert($insert, 'tbl_author_roles_sections');
 				// Fields:
 				if(isset($info['fields']))
 				{
 					foreach($info['fields'] as $id_field => $value)
 					{
-						Symphony::Database()->insert(array('id_role'=>$id_role, 'id_field'=>$id_field, 'hidden'=>1), 'tbl_roles_fields');
+						Symphony::Database()->insert(array('id_role'=>$id_role, 'id_field'=>$id_field, 'hidden'=>1), 'tbl_author_roles_fields');
 					}
 				}
 				// Entries:
@@ -734,14 +734,14 @@ Class extension_role_model extends Extension
 	public function install()
 	{
 		// Roles table:
-		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_roles` (
+		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_author_roles` (
 			`id` INT(11) unsigned NOT NULL auto_increment,
 			`name` VARCHAR(255) NOT NULL,
 		PRIMARY KEY (`id`)
 		);");
 		
 		// Roles <-> Authors
-		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_roles_authors` (
+		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_author_roles_authors` (
 			`id` INT(11) unsigned NOT NULL auto_increment,
 			`id_role` INT(255) unsigned NOT NULL,
 			`id_author` INT(255) unsigned NOT NULL,
@@ -751,7 +751,7 @@ Class extension_role_model extends Extension
 		);");
 		
 		// Roles <-> Sections
-		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_roles_sections` (
+		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_author_roles_sections` (
 			`id` INT(11) unsigned NOT NULL auto_increment,
 			`id_role` INT(255) unsigned NOT NULL,
 			`id_section` INT(255) unsigned NOT NULL,
@@ -768,7 +768,7 @@ Class extension_role_model extends Extension
 		);");
 		
 		// Roles <-> Fields
-		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_roles_fields` (
+		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_author_roles_fields` (
 			`id` INT(11) unsigned NOT NULL auto_increment,
 			`id_role` INT(255) unsigned NOT NULL,
 			`id_field` INT(255) unsigned NOT NULL,
@@ -786,10 +786,10 @@ Class extension_role_model extends Extension
 	public function uninstall()
 	{
 		// Drop all the tables:
-		Symphony::Database()->query("DROP TABLE `tbl_roles`");
-		Symphony::Database()->query("DROP TABLE `tbl_roles_authors`");
-		Symphony::Database()->query("DROP TABLE `tbl_roles_sections`");
-		Symphony::Database()->query("DROP TABLE `tbl_roles_fields`");
+		Symphony::Database()->query("DROP TABLE `tbl_author_roles`");
+		Symphony::Database()->query("DROP TABLE `tbl_author_roles_authors`");
+		Symphony::Database()->query("DROP TABLE `tbl_author_roles_sections`");
+		Symphony::Database()->query("DROP TABLE `tbl_author_roles_fields`");
 	}
 }
 ?>

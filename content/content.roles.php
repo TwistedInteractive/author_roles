@@ -3,7 +3,7 @@
 	require_once(TOOLKIT . '/class.sectionmanager.php');
 	require_once(TOOLKIT . '/class.fieldmanager.php');
 	
-	Class contentExtensionRole_modelRoles extends AdministrationPage
+	Class contentExtensionAuthor_rolesRoles extends AdministrationPage
 	{
 		protected $_uri = null;
 		protected $_driver = null;
@@ -13,8 +13,8 @@
 		
 		function __construct(&$parent){
 			parent::__construct($parent);
-			$this->_uri = URL . '/symphony/extension/role_model/';
-			$this->_driver = Symphony::ExtensionManager()->create('role_model');
+			$this->_uri = URL . '/symphony/extension/author_roles/';
+			$this->_driver = Symphony::ExtensionManager()->create('author_roles');
 		}
 		
 		public function build($context)
@@ -32,8 +32,8 @@
 				$this->_data = $this->_driver->getData($this->_id_role);
 				$this->pageAlert(__('Role successfully created/updated.'), Alert::SUCCESS);
 			}
-			parent::addStylesheetToHead(URL . '/extensions/role_model/assets/role_model.css', 'screen', 70);
-			parent::addScriptToHead(URL . '/extensions/role_model/assets/role_model.js', 71);
+			parent::addStylesheetToHead(URL . '/extensions/author_roles/assets/author_roles.css', 'screen', 70);
+			parent::addScriptToHead(URL . '/extensions/author_roles/assets/author_roles.js', 71);
 			parent::build($context);
 		}
 		
@@ -195,7 +195,7 @@
 			}
 			
 			// Create the table element:
-			$table = Widget::Table(Widget::TableHead($tableHead), null, Widget::TableBody($tableBody), 'role_model');
+			$table = Widget::Table(Widget::TableHead($tableHead), null, Widget::TableBody($tableBody), 'author_roles');
 			$div->appendChild($table);
 			
 			$group->appendChild($div);			

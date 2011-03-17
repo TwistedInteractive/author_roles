@@ -1,11 +1,11 @@
-# Role Model #
+# Author Roles #
 
-Version: 1.0
+Version: 1.0  
 Author: Giel Berkers
 Website: http://www.gielberkers.com
 E-mail: info@gielberkers.com
 
-## What does this extension do? #
+## What does this extension do? ##
 
 In short: this extension allows you to set permissions for each author with roles.
 It is the successor of the [Author Section extension](https://github.com/kanduvisla/author_section).
