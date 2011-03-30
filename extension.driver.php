@@ -504,15 +504,18 @@ Class extension_author_roles extends Extension
 	 */
 	private function getCurrentAuthorRoleData()
 	{
-		$id_author = Administration::instance()->Author->get('id');
-		$id_role   = $this->getAuthorRole($id_author);
-		if($id_role != false)
-		{
-			$data      = $this->getData($id_role);
-			return $data;
-		} else {
-			return false;
-		}
+		if(Administration::instance()->isLoggedIn())
+        {
+            $id_author = Administration::instance()->Author->get('id');
+            $id_role   = $this->getAuthorRole($id_author);
+            if($id_role != false)
+            {
+                $data      = $this->getData($id_role);
+                return $data;
+            } else {
+                return false;
+            }
+        }
 	}
 	
 	/**
@@ -548,13 +551,18 @@ Class extension_author_roles extends Extension
 		{
 			$id_role = intval($_POST['fields']['role']);
 			$id_author = $context['author']->get('id');
+            if($id_author == null)
+            {
+                // This author has just been created, get the ID of this newly created author:
+                $id_author = Symphony::Database()->fetchVar('id', 0, 'SELECT `id` FROM `tbl_authors` WHERE `username` = \''.$context['author']->get('username').'\';');
+            }
 			// Delete previously set roles:
 			$this->deleteAuthorRole($id_author);
 			if($id_role != 0)
 			{
 				// Insert new role:
 				Symphony::Database()->insert(array('id_role'=>$id_role, 'id_author'=>$id_author), 'tbl_author_roles_authors');
-			}
+            }
 		}
 	}
 	
