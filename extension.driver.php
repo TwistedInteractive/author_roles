@@ -117,6 +117,10 @@ Class extension_author_roles extends Extension
 		if(isset($context['author_ids'])) {
 			$context = $context['author_ids'];
 		}
+        // When 'Delete' is clicked in the author-edit screen:
+        if(isset($context['author_id'])) {
+            $context = array($context['author_id']);
+        }
 		// When a single ID is provided:
 		if(!is_array($context))
 		{
@@ -125,7 +129,7 @@ Class extension_author_roles extends Extension
 		// Delete the links:
 		foreach($context as $id_author)
 		{
-			Symphony::Database()->query('DELETE FROM `tbl_author_roles_authors` WHERE `id_author` = '.$id_author.';');
+            Symphony::Database()->query('DELETE FROM `tbl_author_roles_authors` WHERE `id_author` = '.$id_author.';');
 		}
 	}
 	
