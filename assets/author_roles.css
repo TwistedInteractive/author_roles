@@ -1,3 +1,5 @@
+html { overflow-y: scroll; }
+
 table.author_roles { width: 100%; }
 table.author_roles th, table.author_roles td { text-align: left; vertical-align: top; border: 1px solid #ddc; padding: 3px 5px; }
 table.author_roles th.center { text-align: center; width: 50px; }

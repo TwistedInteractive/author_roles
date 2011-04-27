@@ -137,20 +137,24 @@
 				$tBody = array();
 				
 				// Get the fields:
+
 				$fields = $fm->fetch(null, $id);
-				foreach($fields as $field)
-				{
-					$id_field = $field->get('id');
-					$required = $field->get('required');
-					$fieldRow = new XMLElement('tr');
-					$fieldRow->appendChild(new XMLElement('td', $field->get('label')));					
-					if($required == 'no') {
-						$fieldRow->appendChild($this->tdCheckBox('section['.$id.'][fields]['.$id_field.'][hidden]', $this->checkFields($id_field, 'hidden') == 1));
-					} else {
-						$fieldRow->appendChild(new XMLElement('td', __('required').' *', array('class'=>'required')));
-					}
-					$tBody[] = $fieldRow;					
-				}
+                if($fields != false)
+                {
+                    foreach($fields as $field)
+                    {
+                        $id_field = $field->get('id');
+                        $required = $field->get('required');
+                        $fieldRow = new XMLElement('tr');
+                        $fieldRow->appendChild(new XMLElement('td', $field->get('label')));
+                        if($required == 'no') {
+                            $fieldRow->appendChild($this->tdCheckBox('section['.$id.'][fields]['.$id_field.'][hidden]', $this->checkFields($id_field, 'hidden') == 1));
+                        } else {
+                            $fieldRow->appendChild(new XMLElement('td', __('required').' *', array('class'=>'required')));
+                        }
+                        $tBody[] = $fieldRow;
+                    }
+                }
 				$divFields->appendChild(Widget::Table(Widget::TableHead($thead), null, Widget::TableBody($tBody)));
 				$divFields->appendChild(new XMLElement('p', '* '.__('You cannot hide required fields'), array('class'=>'info')));
 				$td->appendChild($divFields);
