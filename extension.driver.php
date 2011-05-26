@@ -149,7 +149,7 @@ Class extension_author_roles extends Extension
 			
 			$label = Widget::Label(__('This author belongs to'));
 			$options = array(
-				array(0, false, __('No role asigned'))
+				array(0, false, __('No role assigned'))
 			);
 			$roles = $this->getRoles();
 			// See which role this user has:
@@ -504,7 +504,7 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Get the role of the current logged in author
-	 * @return	An associated array with all the information you need, or false if no role is asigned
+	 * @return	An associated array with all the information you need, or false if no role is assigned
 	 */
 	private function getCurrentAuthorRoleData()
 	{
