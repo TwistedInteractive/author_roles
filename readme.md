@@ -20,7 +20,7 @@ More detailed: The extension allows you to set the following permissions:
 
 ## How does it work? ##
 
-Under the System-tab you see a new item 'Roles'. This is where you can manage your roles. You can create as many roles as you want, and assign a role to multiple authors.
+Under the System-tab you see a new item 'Author Roles'. This is where you can manage your author roles. You can create as many roles as you want, and asign a role to multiple authors.
 
 When you create a role you can set the permission for each section, by using the checkboxes. By clicking 'edit' underneath 'Fields' you can select which fields should be hidden for this section.
 

@@ -108,12 +108,15 @@
 			$sm = new SectionManager($this);
 			$fm = new FieldManager($this);
 			$sections = $sm->fetch();
-			
+
+            $i = 0;
 			foreach($sections as $section)
 			{
 				$id = $section->get('id');
-				// Create a row for each section, with a rowspan:				
-				$row = new XMLElement('tr');				
+                $i++;
+                $classArray = $i % 2 == 0 ? array('class'=>'even') : array();
+				// Create a row for each section, with a rowspan:
+				$row = new XMLElement('tr', null, $classArray);				
 				$row->appendChild(new XMLElement('td', $section->get('name'), array('rowspan'=>2)));
 				$row->appendChild($this->tdCheckBox('section['.$id.'][visible]', $this->checkSection($id, 'visible') == 1));
 				$row->appendChild($this->tdCheckBox('section['.$id.'][create]', $this->checkSection($id, 'create') == 1));

@@ -19,5 +19,7 @@ table.author_roles label { padding: 3px 0; }
 table.author_roles label input[type=checkbox] { float: none; position: static; top: 0; }
 table.author_roles td.options div.entries label { margin-bottom: 0; }
 table.author_roles td.options div.fields p.info { margin: 0; }
+table.author_roles tr.even td { background:  #ddd; }
+table.author_roles tr:hover td { border-bottom-color: #444; }
 table.author_roles div.filter { margin-bottom: 5px; display: none; }
 table.author_roles div.filter input { margin-right: 0; float: none; }

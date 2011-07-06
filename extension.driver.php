@@ -446,7 +446,7 @@ Class extension_author_roles extends Extension
 		// Fields should be hidden with JavaScript, so the data still gets posted when saving an entry:
 		$script = new XMLElement('script', 'var roles_hidden_fields = ['.implode(',', $hiddenFields).'];', array('type'=>'text/javascript'));
 		$context['oPage']->addElementToHead($script);
-		$context['oPage']->addScriptToHead(URL.'/extensions/role_model/assets/role_model.js');
+		$context['oPage']->addScriptToHead(URL.'/extensions/author_roles/assets/author_roles.js');
 		
 		$section = $callback['context']['section_handle'];
 		foreach($data['sections'] as $id_section => $rules)
