@@ -6,8 +6,8 @@ Class extension_author_roles extends Extension
 	{
 		return array(
 			'name' => 'Author Roles',
-			'version' => '1.0',
-			'release-date' => '2011-03-17',
+			'version' => '1.1',
+			'release-date' => '2012-05-08',
 			'author' => array(
 				'name' => 'Giel Berkers',
 				'website' => 'http://www.gielberkers.com',
@@ -64,12 +64,13 @@ Class extension_author_roles extends Extension
 	}
 	
 	/** Extend the navigation. Adds a 'Roles'-button to the system-tab, and hides hidden sections from the navigation
-	 * @param	$context	The context object
+	 * @param	$context
+	 *  The context object
 	 */
 	public function extendNavigation($context)
 	{
 		// Add the roles button to the system-tab:
-		$context['navigation'][200]['children'][] = array(
+		$context['navigation'][100]['children'][] = array(
 			'link'  => '/extension/author_roles/',
 			'name'  => __('Author Roles'),
 			'limit' => 'developer'
@@ -105,7 +106,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Delete the links to this author
-	 * @param	$context	Can be a Symphony Context object, an id of an author, or an array with author-id's
+	 * @param	$context
+	 *  Can be a Symphony Context object, an id of an author, or an array with author-id's
 	 */
 	public function deleteAuthorRole($context)
 	{
@@ -135,7 +137,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Add the role field to the author-form:
-	 * @param	$context	The context, providing the form and the author object
+	 * @param	$context
+	 *  The context, providing the form and the author object
 	 */
 	public function addRolePicker($context)
 	{
@@ -164,23 +167,22 @@ Class extension_author_roles extends Extension
 			$div->appendChild(new XMLElement('p', __('<strong>Please note:</strong> According to the role you selected, some sections may not be visible to this author. If the <strong>Default Area</strong> of this author is set to one of these hidden sections, it will result in an authorization error message when he or she logs in. Be aware to set the Default Area to an area the author is allowed to see.')));
 			$group->appendChild($div);
 			
-			$newForm = new XMLElement('form', null, $context['form']->getAttributes());
+			$i = 0;
 			foreach($context['form']->getChildren() as $formChild)
 			{
 				if($formChild->getName() != 'fieldset') {
 					// Inject here:
-					$newForm->appendChild($group);
+					$context['form']->insertChildAt($i, $group);
 				}
-				$newForm->appendChild($formChild);
+				$i++;
 			}
-			
-			$context['form'] = $newForm;
 		}
 	}
 	
 	/**
 	 * Perform certain actions according to the page callback
-	 * @param	$context	The context object
+	 * @param	$context
+	 *  The context object
 	 */
 	public function checkCallback($context)
 	{
@@ -212,7 +214,15 @@ Class extension_author_roles extends Extension
 				}
 		}
 	}
-	
+
+	/**
+	 * Adjust the publish index screen
+	 * @param $context
+	 *  The context
+	 * @param $callback
+	 *  The callback
+	 * @return mixed
+	 */
 	private function adjustIndex($context, $callback)
 	{
 		$data = $this->getCurrentAuthorRoleData();
@@ -398,7 +408,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * See if there should be made some adjustments to the current page:
-	 * @param	$context	The context
+	 * @param	$context
+	 *  The context
 	 */
 	public function makePreAdjustements($context)
 	{
@@ -424,8 +435,10 @@ Class extension_author_roles extends Extension
 	}
 	
 	/** Adjust the entry editor on the publish page
-	 * @param	$context	Provided with a page object
-	 * @param	$callback	The current callback
+	 * @param	$context
+	 *  Provided with a page object
+	 * @param	$callback
+	 *  The current callback
 	 */
 	private function adjustEntryEditor($context, $callback)
 	{
@@ -504,7 +517,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Get the role of the current logged in author
-	 * @return	An associated array with all the information you need, or false if no role is assigned
+	 * @return array|boolean
+	 *  An associated array with all the information you need, or false if no role is assigned
 	 */
 	private function getCurrentAuthorRoleData()
 	{
@@ -524,7 +538,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Change the dropdown with the default author areas
-	 * @param	$context	The context
+	 * @param	$context
+	 *  The context
 	 */
 	public function modifyAreas($context)
 	{
@@ -547,7 +562,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Save the role to this author. This is send after the save-button is clicked on the author-screen.
-	 * @param	$context	The context
+	 * @param	$context
+	 *  The context
 	 */
 	public function saveAuthorRole($context)
 	{
@@ -572,7 +588,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Get the roles
-	 * @return	An array with the roles
+	 * @return	array
+	 *  An array with the roles
 	 */
 	public function getRoles()
 	{
@@ -582,8 +599,10 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Get the authors from a specific role:
-	 * @param	$id_role	The ID of the role
-	 * @return	array		An array with the id, first_name and last_name of the authors
+	 * @param	$id_role
+	 *  The ID of the role
+	 * @return	array
+	 *  An array with the id, first_name and last_name of the authors
 	 */
 	public function getAuthors($id_role)
 	{
@@ -603,8 +622,10 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Get the role of this author
-	 * @param	$id_author	The ID of the author
-	 * @return	The role ID
+	 * @param	$id_author
+	 *  The ID of the author
+	 * @return  int
+	 *  The role ID
 	 */
 	public function getAuthorRole($id_author)
 	{
@@ -614,8 +635,10 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Load the data
-	 * @param	$id	int	The ID of the Role
-	 * @return	An associated array with all the information you need of this role, or false of no role is supplied
+	 * @param	$id_role
+	 *  int	The ID of the Role
+	 * @return array|boolean
+	 *  An associated array with all the information you need of this role, or false of no role is supplied
 	 */
 	public function getData($id_role)
 	{
@@ -625,7 +648,11 @@ Class extension_author_roles extends Extension
 			// The name of the role:
 			$roleResult = Symphony::Database()->fetch('SELECT * FROM `tbl_author_roles` WHERE `id` = '.$id_role.';');
 			$data['name'] = $roleResult[0]['name'];
-			
+
+			// Get sections from the section manager:
+			$availableSections = SectionManager::fetch();
+//			print_r($availableSections);
+
 			// The associated sections:
 			$sections = Symphony::Database()->fetch('
 				SELECT
@@ -636,24 +663,31 @@ Class extension_author_roles extends Extension
 					A.`delete`,
 					A.`own_entries`,
 					A.`use_filter`,
-					A.`filter_rule`,
-					B.`name`,
-					B.`handle`
+					A.`filter_rule`
 				FROM
-					`tbl_author_roles_sections` A,
-					`tbl_sections` B
+					`tbl_author_roles_sections` A
 				WHERE
-					A.`id_role` = '.$id_role.' AND
-					A.`id_section` = B.`id`
+					A.`id_role` = '.$id_role.'
 				;');
 			$data['sections'] = array();
 			foreach($sections as $section)
 			{
 				$id_section = $section['id_section'];
 				unset($section['id_section']);
+
+				foreach($availableSections as $s)
+				{
+					/* @var $s Section */
+					if($s->get('id') == $id_section)
+					{
+						$section['name'] = $s->get('name');
+						$section['handle'] = $s->get('handle');
+					}
+				}
+
 				$data['sections'][$id_section] = $section;
 			}
-			
+
 			// The fields:
 			$fields = Symphony::Database()->fetch('SELECT * FROM `tbl_author_roles_fields` WHERE `id_role` = '.$id_role.';');
 			$data['fields'] = array();
@@ -675,7 +709,8 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Delete a role
-	 * @param	$id	The ID of the role
+	 * @param	$id
+	 *  The ID of the role
 	 */
 	public function deleteRole($id)
 	{
@@ -687,7 +722,10 @@ Class extension_author_roles extends Extension
 	
 	/**
 	 * Save Role data
-	 * @param	$values		An array with information about the role to be stored
+	 * @param	$values
+	 *  An array with information about the role to be stored
+	 * @return int|boolean
+	 *  The ID of the role, or false on failure
 	 */
 	public function saveData($values)
 	{
@@ -736,7 +774,7 @@ Class extension_author_roles extends Extension
 			}
 			return $id_role;
 		} else {
-			return 0;
+			return false;
 		}
 	}
 	

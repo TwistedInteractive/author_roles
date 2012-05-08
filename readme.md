@@ -1,6 +1,6 @@
 # Author Roles #
 
-Version: 1.0  
+Version: 1.1
 Author: Giel Berkers
 Website: http://www.gielberkers.com
 E-mail: info@gielberkers.com

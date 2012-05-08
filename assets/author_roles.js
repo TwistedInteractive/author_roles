@@ -6,10 +6,16 @@ jQuery(function(){
 		$("td").removeClass("active");
 		var match = $("div." + rel, $(this).parent().parent().next());
 		$(this).parent().addClass("active");
-		match.stop().slideToggle(250);		
+		match.stop().slideToggle(250, function(){
+			if(this.style.display == 'none')
+			{
+				$("td", $(this).parent().parent().prev()).removeClass("active");
+			}
+		});
 		return false;
 	});
-	
+
+	// Check all checkboxes:
 	$("table.author_roles th span").each(function(){
 		$(this).click(function(){
 			var rel = $(this).attr("rel");
@@ -21,7 +27,8 @@ jQuery(function(){
 			}
 		});		
 	});
-	
+
+	// Filter:
 	$("table.author_roles div.entries input[name$='[use_filter]']").each(function(){
 		if($(this).attr("checked"))
 		{

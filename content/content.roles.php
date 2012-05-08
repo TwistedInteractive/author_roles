@@ -11,8 +11,8 @@
 		protected $_data = array();
 		protected $_id_role = 0;
 		
-		function __construct(&$parent){
-			parent::__construct($parent);
+		function __construct(){
+			parent::__construct();
 			$this->_uri = URL . '/symphony/extension/author_roles/';
 			$this->_driver = Symphony::ExtensionManager()->create('author_roles');
 		}
@@ -29,8 +29,14 @@
 			if(isset($_POST['save'])) {
 				// Save:				
 				$this->_id_role = $this->_driver->saveData($_POST);
-				$this->_data = $this->_driver->getData($this->_id_role);
-				$this->pageAlert(__('Role successfully created/updated.'), Alert::SUCCESS);
+				if($this->_id_role != false)
+				{
+					$this->_data = $this->_driver->getData($this->_id_role);
+					$this->pageAlert(__('Role successfully created/updated.'), Alert::SUCCESS);
+				} else {
+
+					$this->pageAlert(__('Role not saved: Please enter a name.'), Alert::ERROR);
+				}
 			}
 			parent::addStylesheetToHead(URL . '/extensions/author_roles/assets/author_roles.css', 'screen', 70);
 			parent::addScriptToHead(URL . '/extensions/author_roles/assets/author_roles.js', 71);
@@ -105,9 +111,7 @@
 			$tableBody = array();
 			
 			// Get the sections:
-			$sm = new SectionManager($this);
-			$fm = new FieldManager($this);
-			$sections = $sm->fetch();
+			$sections = SectionManager::fetch();
 
             $i = 0;
 			foreach($sections as $section)
@@ -141,7 +145,7 @@
 				
 				// Get the fields:
 
-				$fields = $fm->fetch(null, $id);
+				$fields = FieldManager::fetch(null, $id);
                 if($fields != false)
                 {
                     foreach($fields as $field)
@@ -217,7 +221,7 @@
 				$buttonText = __('Save Changes');
 			}
 			// Add the ID:
-			$actions->appendChild(Widget::Input('id_role', $this->_id_role, 'hidden'));
+			$actions->appendChild(Widget::Input('id_role', (string)$this->_id_role, 'hidden'));
 			$actions->appendChild(Widget::Input('save', $buttonText, 'submit'));
 			$this->Form->appendChild($actions);
 		}

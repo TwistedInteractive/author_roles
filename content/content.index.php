@@ -5,13 +5,20 @@
 	{
 		protected $_uri = null;
 		protected $_driver = null;
-		
-		function __construct(&$parent){
-			parent::__construct($parent);
+
+		/**
+		 * Constructor
+		 */
+		function __construct(){
 			$this->_uri = URL . '/symphony/extension/author_roles/';
 			$this->_driver = Symphony::ExtensionManager()->create('author_roles');
+			parent::__construct();
 		}
-		
+
+		/**
+		 * Build the page
+		 * @param array $context
+		 */
 		public function build($context)
 		{
 			if(Administration::instance()->Author->isDeveloper()) {
@@ -25,7 +32,10 @@
 				parent::build($context);
 			}
 		}
-		
+
+		/**
+		 * The view
+		 */
 		public function view()
 		{
 			$this->setTitle('Symphony &ndash; Roles');
@@ -93,17 +103,19 @@
 				Widget::TableBody($tableBody), 'selectable'
 			);
 			$this->Form->appendChild($table);
-			
-			// Add the actions:
-			$actions = new XMLElement('div');
-			$actions->setAttribute('class', 'actions');
+
+			$tableActions = new XMLElement('div');
+			$tableActions->setAttribute('class', 'actions');
+
 			$options = array(
 				array(null, false, __('With Selected...')),
-				array('delete', false, __('Delete'))									
+				array('delete', false, __('Delete'), 'confirm', null, array(
+					'data-message' => __('Are you sure you want to delete the selected roles?')
+				))
 			);
-			$actions->appendChild(Widget::Select('with-selected', $options));
-			$actions->appendChild(Widget::Input('action[apply]', __('Apply'), 'submit'));
-			$this->Form->appendChild($actions);
+
+			$tableActions->appendChild(Widget::Apply($options));
+			$this->Form->appendChild($tableActions);
 		}
 	}
 ?>
