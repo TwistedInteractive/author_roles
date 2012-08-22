@@ -248,10 +248,13 @@ Class extension_author_roles extends Extension
 				if($rules['create'] == 0)
 				{
 					// It is not allowed to create new items:
-					$children = $context['oPage']->Contents->getChildren();
-					$header   = $children[0];
-					$value    = $header->getValue();
-					$header->setValue('<span>'.strip_tags(str_replace(__('Create New'), '', $value)).'</span><span class="create" />');
+					$children = current($context['oPage']->Context->getChildrenByName('ul'))->getChildrenByName('li');
+					foreach ( $children as $key => $child ){
+						if ( strpos($child->getValue(),__('Create New')) !== false ){
+							$value = $child->getValue();
+							$child->setValue('<span>'.strip_tags(str_replace(__('Create New'), '', $value)).'</span><span class="create" />');
+						}
+					}
 				}
 				if($rules['own_entries'] == 1 || $rules['edit'] == 0 || $rules['delete'] == 0 || $rules['use_filter'] == 1)
 				{
