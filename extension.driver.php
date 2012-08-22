@@ -248,10 +248,13 @@ Class extension_author_roles extends Extension
 				if($rules['create'] == 0)
 				{
 					// It is not allowed to create new items:
-					$children = $context['oPage']->Contents->getChildren();
-					$header   = $children[0];
-					$value    = $header->getValue();
-					$header->setValue('<span>'.strip_tags(str_replace(__('Create New'), '', $value)).'</span><span class="create" />');
+					$children = current($context['oPage']->Context->getChildrenByName('ul'))->getChildrenByName('li');
+					foreach ( $children as $key => $child ){
+						if ( strpos($child->getValue(),__('Create New')) !== false ){
+							$value = $child->getValue();
+							$child->setValue('<span>'.strip_tags(str_replace(__('Create New'), '', $value)).'</span><span class="create" />');
+						}
+					}
 				}
 				if($rules['own_entries'] == 1 || $rules['edit'] == 0 || $rules['delete'] == 0 || $rules['use_filter'] == 1)
 				{
@@ -356,46 +359,45 @@ Class extension_author_roles extends Extension
 									// Only proceed if you can either edit or delete. Otherwise it would have much sense to have an apply-button here...
 									if($rules['delete'] == 1 || $rules['edit'] == 1)
 									{
-										$newActions = new XMLElement('div', null, $formChild->getAttributes());
-										foreach($formChild->getChildren() as $actionChild)
+										$child = self::findChildren($formChild,'select');
+										$child = $child[0];
+
+										$newSelect = new XMLElement('select', null, $child->getAttributes());
+										foreach($child->getChildren() as $selectChild)
 										{
-											if($actionChild->getName() == 'select')
+											// See if delete is allowed:													
+											if($selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1)
 											{
-												$newSelect = new XMLElement('select', null, $actionChild->getAttributes());
-												foreach($actionChild->getChildren() as $selectChild)
+												$newSelect->appendChild($selectChild);
+											} elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
+												// Check if the field that is edited is not a hidden field, because then editing is not allowed:
+												$optGroupChildren = $selectChild->getChildren();
+												if(!empty($optGroupChildren))
 												{
-													// See if delete is allowed:													
-													if($selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1)
+													$value = $optGroupChildren[0]->getAttribute('value');
+													$a = explode('-', str_replace('toggle-', '', $value));
+													if(!in_array($a[0], $hiddenFields))
 													{
-														$newSelect->appendChild($selectChild);
-													} elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
-														// Check if the field that is edited is not a hidden field, because then editing is not allowed:
-														$optGroupChildren = $selectChild->getChildren();
-														if(!empty($optGroupChildren))
-														{
-															$value = $optGroupChildren[0]->getAttribute('value');
-															$a = explode('-', str_replace('toggle-', '', $value));
-															if(!in_array($a[0], $hiddenFields))
-															{
-																$newSelect->appendChild($selectChild);												
-															}
-														}
-													} elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
-														$newSelect->appendChild($selectChild);
+														$newSelect->appendChild($selectChild);												
 													}
 												}
-												$newActions->appendChild($newSelect);
-											} else {
-												$newActions->appendChild($actionChild);
+											} elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
+												$newSelect->appendChild($selectChild);
 											}
 										}
-										$newForm->appendChild($newActions);
+										// if the new select has only one entry,
+										// it is the dummy entry and we can discard it
+										if ($newSelect->getNumberOfChildren() > 1 ) {
+											self::replaceChild($formChild, $newSelect);
+											$newForm->appendChild($formChild);
+										}
 									}
 								} else {
 									$newForm->appendChild($formChild);
 								}
 							}
 							$newContents->appendChild($newForm);
+							$context['oPage']->Form = $newForm;
 						} else {
 							$newContents->appendChild($contentsChild);
 						}
@@ -433,7 +435,35 @@ Class extension_author_roles extends Extension
 			}
 		}
 	}
-	
+
+	// return all ancestors of the given element with the given names
+	// names can be a comma seperated list or an array of strings	
+	private static function findChildren($element, $names){
+		if ( !is_array($names) )
+			$names = explode(',', $names);
+		$children = array();
+		foreach ( $element->getChildren() as $child ) {
+			$children = array_merge($children, self::findChildren($child,$names));
+			if ( in_array($child->getName(), $names ) )
+				$children[] = $child;
+		}
+		return $children;
+	}
+
+	// replaces the first ancestor of the first argument which
+	// name matches the name of the second argument with
+	// the second argument	
+	private static function replaceChild($parent, $child){
+		foreach ( $parent->getChildren() as $position => $oldChild ) {
+			if ( $oldChild->getName() == $child->getName() ) {
+				$parent->replaceChildAt($position,$child);
+				return true;
+			}
+			if ( self::replaceChild($oldChild, $child) )
+				return true;
+		}
+		return false;
+	}
 	/** Adjust the entry editor on the publish page
 	 * @param	$context
 	 *  Provided with a page object
@@ -501,10 +531,16 @@ Class extension_author_roles extends Extension
 										$newForm->appendChild($actionDiv);
 									}
 								} else {
+
+									if ( $rules['edit'] == 0 ) {
+										foreach( self::findChildren($formChild,'input,select,textarea') as $child ) 
+											$child->setAttribute('disabled','disabled');
+									}
 									$newForm->appendChild($formChild);
 								}
 							}
 							$newContents->appendChild($newForm);
+							$context['oPage']->Form = $newForm;
 						} else {
 							$newContents->appendChild($contentsChild);
 						}
