@@ -436,7 +436,21 @@ Class extension_author_roles extends Extension
 			}
 		}
 	}
-	
+
+	// return all ancestors of the given element with the given names
+	// names can be a comma seperated list or an array of strings	
+	private static function findChildren($element, $names){
+		if ( !is_array($names) )
+			$names = explode(',', $names);
+		$children = array();
+		foreach ( $element->getChildren() as $child ) {
+			$children = array_merge($children, self::findChildren($child,$names));
+			if ( in_array($child->getName(), $names ) )
+				$children[] = $child;
+		}
+		return $children;
+	}
+
 	/** Adjust the entry editor on the publish page
 	 * @param	$context
 	 *  Provided with a page object
@@ -504,6 +518,11 @@ Class extension_author_roles extends Extension
 										$newForm->appendChild($actionDiv);
 									}
 								} else {
+
+									if ( $rules['edit'] == 0 ) {
+										foreach( self::findChildren($formChild,'input,select,textarea') as $child ) 
+											$child->setAttribute('disabled','disabled');
+									}
 									$newForm->appendChild($formChild);
 								}
 							}
