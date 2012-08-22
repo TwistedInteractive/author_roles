@@ -397,6 +397,7 @@ Class extension_author_roles extends Extension
 								}
 							}
 							$newContents->appendChild($newForm);
+							$context['oPage']->Form = $newForm;
 						} else {
 							$newContents->appendChild($contentsChild);
 						}
@@ -539,6 +540,7 @@ Class extension_author_roles extends Extension
 								}
 							}
 							$newContents->appendChild($newForm);
+							$context['oPage']->Form = $newForm;
 						} else {
 							$newContents->appendChild($contentsChild);
 						}
