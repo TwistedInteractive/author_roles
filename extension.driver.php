@@ -6,13 +6,13 @@ Class extension_author_roles extends Extension
 	{
 		return array(
 			'name' => 'Author Roles',
-			'version' => '1.1',
-			'release-date' => '2012-05-08',
+			'version' => '1.2',
+			'release-date' => '2012-10-04',
 			'author' => array(
 				'name' => 'Giel Berkers',
 				'website' => 'http://www.gielberkers.com',
 				'email' => 'info@gielberkers.com'),
-			'description' => 'Author Roles for Symphony 2.2'
+			'description' => 'Author Roles for Symphony 2.2 and above'
 		);
 	}
 	
@@ -75,13 +75,19 @@ Class extension_author_roles extends Extension
 			'name'  => __('Author Roles'),
 			'limit' => 'developer'
 		);
-		
+
 		$data = $this->getCurrentAuthorRoleData();
 		if($data == false || Administration::instance()->Author->isDeveloper()) {			
 			return;
 		}
-		
-		// Disable non-visible sectors:
+
+		$custom_elements = explode("\n", $data['custom_elements']);
+		foreach($custom_elements as &$elem)
+		{
+			$elem = trim($elem);
+		}
+
+		// Disable non-visible sections:
 		$visible = array();
 		foreach($data['sections'] as $id => $rules)
 		{
@@ -96,6 +102,11 @@ Class extension_author_roles extends Extension
 				if(isset($section['section'])) {					
 					if(!in_array($section['section']['id'], $visible))
 					{
+						$section['visible'] = 'no';
+					}
+				}
+				if(isset($section['link'])) {
+					if(in_array($section['link'], $custom_elements)) {
 						$section['visible'] = 'no';
 					}
 				}
@@ -684,6 +695,7 @@ Class extension_author_roles extends Extension
 			// The name of the role:
 			$roleResult = Symphony::Database()->fetch('SELECT * FROM `tbl_author_roles` WHERE `id` = '.$id_role.';');
 			$data['name'] = $roleResult[0]['name'];
+			$data['custom_elements'] = $roleResult[0]['custom_elements'];
 
 			// Get sections from the section manager:
 			$availableSections = SectionManager::fetch();
@@ -765,17 +777,19 @@ Class extension_author_roles extends Extension
 	 */
 	public function saveData($values)
 	{
-		// Get the name:
+		// Get the main data:
 		$name = isset($values['name']) ? Symphony::Database()->cleanValue($values['name']) : '';
+		$custom_elements = isset($values['custom_elements']) ? $values['custom_elements'] : '';
+
 		if(!empty($name) && isset($values['id_role']))
 		{
 			// Create the role:
 			if($values['id_role'] == 0) {
-				Symphony::Database()->insert(array('name'=>$name), 'tbl_author_roles');
+				Symphony::Database()->insert(array('name'=>$name, 'custom_elements'=>$custom_elements), 'tbl_author_roles');
 				$id_role = Symphony::Database()->getInsertId();
 			} else {
 				$id_role = $values['id_role'];
-				Symphony::Database()->update(array('name'=>$name), 'tbl_author_roles', '`id` = '.$id_role);
+				Symphony::Database()->update(array('name'=>$name, 'custom_elements'=>$custom_elements), 'tbl_author_roles', '`id` = '.$id_role);
 			}
 			// First delete all links in the database before new ones are created:
 			Symphony::Database()->query('DELETE FROM `tbl_author_roles_sections` WHERE `id_role` = '.$id_role.';');
@@ -823,6 +837,7 @@ Class extension_author_roles extends Extension
 		Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_author_roles` (
 			`id` INT(11) unsigned NOT NULL auto_increment,
 			`name` VARCHAR(255) NOT NULL,
+			`custom_elements` TEXT NULL,
 		PRIMARY KEY (`id`)
 		);");
 		
@@ -865,7 +880,7 @@ Class extension_author_roles extends Extension
 		);");
 		
 	}
-	
+
 	/**
 	 * Uninstallation
 	 */
@@ -877,5 +892,18 @@ Class extension_author_roles extends Extension
 		Symphony::Database()->query("DROP TABLE `tbl_author_roles_sections`");
 		Symphony::Database()->query("DROP TABLE `tbl_author_roles_fields`");
 	}
+
+	/**
+	 * Update instructions
+	 * @param $previousVersion
+	 *  The version that is currently installed in this Symphony installation
+	 * @return boolean
+	 */
+	public function update($previousVersion) {
+		if (version_compare($previousVersion, '1.2', '<')) {
+			// Update from pre-1.1 to 1.2:
+			return Symphony::Database()->query('ALTER TABLE  `tbl_author_roles` ADD  `custom_elements` TEXT NULL;');
+		}
+	}
 }
-?>
+

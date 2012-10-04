@@ -211,7 +211,21 @@
 			
 			$group->appendChild($div);			
 			$this->Form->appendChild($group);
-			
+
+			// Add custom elements:
+			$group = new XMLElement('fieldset');
+			$group->setAttribute('class', 'settings');
+			$group->appendChild(new XMLElement('legend', __('Custom links')));
+
+			$label = new XMLElement('label', __('Hide custom menu elements'));
+			$label->appendChild(Widget::Textarea('custom_elements', 5, 15, $this->_data['custom_elements']));
+			$label->appendChild(new XMLElement('p', __('Enter the links of custom menu elements to exclude these links from the main navigation. You can use this to exclude extensions-driven menu-items like Dashboard or Search Index for example. Give one link per line, and enter the URL after the <code>/symphony/</code>-part. For example: <code>/extension/dashboard/index/</code>.'), array('class'=>'help')));
+
+			$group->appendChild($label);
+
+			$this->Form->appendChild($group);
+
+
 			// Add the actions:
 			$actions = new XMLElement('div');
 			$actions->setAttribute('class', 'actions');

@@ -1,6 +1,6 @@
 # Author Roles #
 
-Version: 1.1
+Version: 1.2
 Author: Giel Berkers
 Website: http://www.gielberkers.com
 E-mail: info@gielberkers.com
@@ -17,6 +17,7 @@ More detailed: The extension allows you to set the following permissions:
 - **Hide fields on certain sections**
 - **Let the author only see their own created entries**
 - **Show or hide certain entries on the publish page of sections**
+- **Hide menu items created by other extensions**
 
 ## How does it work? ##
 
@@ -25,6 +26,24 @@ Under the System-tab you see a new item 'Author Roles'. This is where you can ma
 When you create a role you can set the permission for each section, by using the checkboxes. By clicking 'edit' underneath 'Fields' you can select which fields should be hidden for this section.
 
 By clicking 'edit' underneath 'Entries' you can set various permissions. You can set if the author is only allowed to see the entries he/she created, and you can set a filter. The filter works quite easy actually. First you choose if the filter is to show or hide certain entries. In the textfield you can on or more ID's of entries. You can also set a range of ID's by using a hyphen.
+
+## Important sidenote for hiding menu items created by other extensions ##
+
+Since extensions can not (yet) influence the execution order of extensions in Symphony, you need to apply a tiny little 'hack'
+to Symphony to make sure the 'Author Roles'-extension is executed as last, after all other extensions have made their possible
+modifications to the navigation. To do this, you need to edit `lib/toolkit/class.extensionmanager.php` and look at the SQL-query
+in the `__construct()`-function for this line:
+
+    ORDER BY t2.delegate, t1.name
+
+and change it to:
+
+    ORDER BY t2.delegate, t1.id ASC
+
+This makes the execution order of extensions ordered by ID instead of name. Now, if you added this extension as last to your list,
+you're safe now, otherwise you have to go into the database, look for the `tbl_extensions`-table, write down the ID, and update the
+ID to be the highest number in the table. Don't change the other extensions! After that, edit the `tbl_extensions_delegates`-table
+and change the rows which have `extension_id` set to the old ID, and update them to the new ID. Now everything should work just fine!
 
 ## Sidenotes ##
 
