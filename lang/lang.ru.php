@@ -7,7 +7,7 @@
 			'email' => 'info@alexbirukov.ru',
 			'website' => 'http://alexbirukov.ru'
 		),
-		'release-date' => '2012-10-18'
+		'release-date' => '2012-12-11'
 	);
 
 	/**
@@ -42,11 +42,20 @@
 		'Create a new role' => 
 		'Добавить роль',
 
+		'Custom links' => 
+		'Пользовательские ссылки',
+
+		'Enter the links of custom menu elements to exclude these links from the main navigation. You can use this to exclude extensions-driven menu-items like Dashboard or Search Index for example. Give one link per line, and enter the URL after the <code>/symphony/</code>-part. For example: <code>/extension/dashboard/index/</code>.' => 
+		'Укажите ссылки на элементы меню, чтобы убрать эти элементы из меню навигации. Вы можете использовать данное расширение, чтобы скрыть такие элементы, как Система или Поиск, например. Елементы необходимо вписвать по одному на строку и указывать URL следующий за <code>/symphony/</code>. Например: <code>/extension/dashboard/index/</code>.',
+
 		'Filter type' => 
 		'Тип фильтра',
 
 		'Hide' => 
 		'Скрыть',
+
+		'Hide custom menu elements' => 
+		'Скрыть пользовательские элементы меню',
 
 		'No role assigned' => 
 		'Роль не указана',
@@ -81,13 +90,10 @@
 		'required' => 
 		'обязательно',
 
-		'Custom links' => 
-		'Пользовательские ссылки',
+		'ID\'s' => 
+		'ID\'s',
 
-		'Hide custom menu elements' => 
-		'Скрыть пользовательские элементы меню',
-
-		'Enter the links of custom menu elements to exclude these links from the main navigation. You can use this to exclude extensions-driven menu-items like Dashboard or Search Index for example. Give one link per line, and enter the URL after the <code>/symphony/</code>-part. For example: <code>/extension/dashboard/index/</code>.' => 
-		'Укажите ссылки на элементы меню, чтобы убрать эти элементы из меню навигации. Вы можете использовать данное расширение, чтобы скрыть такие элементы, как Система или Поиск, например. Елементы необходимо вписвать по одному на строку и указывать URL следующий за <code>/symphony/</code>. Например: <code>/extension/dashboard/index/</code>.',
+		'Enter a list of comma-seperated ID\'s. Define ranges with a hyphen.<br />Example: <code>2,3,6-11,13</code>' => 
+		'Укажите список ID, разделённых запятыми. Вы можете указать диапазон при помощи дефиса.<br />Пример: <code>2,3,6-11,13</code>',
 
 	);
