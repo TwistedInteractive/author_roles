@@ -219,7 +219,6 @@ Class extension_author_roles extends Extension
 						break;
 				}
 				break;
-			}
 		}
 	}
 
