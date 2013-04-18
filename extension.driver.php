@@ -69,7 +69,6 @@ Class extension_author_roles extends Extension
 				'name' => __('Author Roles'),
 				'location' => 200,
 				'limit' => 'developer'
-				)
 			)
 		);
 	}
@@ -209,7 +208,7 @@ Class extension_author_roles extends Extension
 			case 'publish' :
 				// The Publish Screen:
 				switch($callback['context']['page']) {
-					case 'index' : {
+					case 'index' :
 						// The index:
 						$this->adjustIndex($context, $callback);
 						break;
@@ -220,7 +219,6 @@ Class extension_author_roles extends Extension
 						break;
 				}
 				break;
-			}
 		}
 	}
 
