@@ -67,7 +67,7 @@ Class extension_author_roles extends Extension
 		return array(
 			array(
 				'name' => __('Author Roles'),
-				'location' => 200,
+				'location' => 100,
 				'limit' => 'developer'
 			)
 		);
