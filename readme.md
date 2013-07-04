@@ -1,9 +1,7 @@
 # Author Roles #
 
-Version: 1.2
-Author: Giel Berkers
-Website: http://www.gielberkers.com
-E-mail: info@gielberkers.com
+Author: Twisted Interactive  
+Website: http://www.twisted.nl
 
 ## What does this extension do? ##
 
