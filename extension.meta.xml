@@ -7,6 +7,10 @@
 		<type>Workflow</type>
 	</types>
 	<authors>
+		<author>
+			<name github="TwistedInteractive">Twisted Interactive</name>
+			<website>http://www.twisted.nl</website>
+		</author>
 	</authors>
 	<releases>
 		<release version="1.0" date="2011-03-17" min="2.2" max="2.2.5" />
