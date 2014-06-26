@@ -99,8 +99,12 @@
 			
 			// Create the table element:
 			$table = Widget::Table(
-				Widget::TableHead($tableHead), null, 
-				Widget::TableBody($tableBody), 'selectable'
+				Widget::TableHead($tableHead),
+				NULL,
+				Widget::TableBody($tableBody),
+				'selectable',
+				null,
+				array('role' => 'directory', 'aria-labelledby' => 'symphony-subheading', 'data-interactive' => 'data-interactive')
 			);
 			$this->Form->appendChild($table);
 
