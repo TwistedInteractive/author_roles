@@ -79,7 +79,7 @@ Class extension_author_roles extends Extension
 	public function extendNavigation($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 
@@ -153,7 +153,7 @@ Class extension_author_roles extends Extension
 	 *  The context, providing the form and the author object
 	 */
 	public function addRolePicker($context) {
-		if(Administration::instance()->Author->isDeveloper()) {
+		if(Administration::instance()->Author()->isDeveloper()) {
 			$group = new XMLElement('fieldset');
 			$group->setAttribute('class', 'settings');
 			$group->appendChild(new XMLElement('legend', __('Author Role')));
@@ -232,7 +232,7 @@ Class extension_author_roles extends Extension
 	private function adjustIndex($context, $callback) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 
@@ -266,7 +266,7 @@ Class extension_author_roles extends Extension
 				if($rules['own_entries'] == 1 || $rules['edit'] == 0 || $rules['delete'] == 0 || $rules['use_filter'] == 1) {
 					// For only show entries created by this author:
 					// Get a list of entry id's created by this author:
-					$id_author = Administration::instance()->Author->get('id');
+					$id_author = Administration::instance()->Author()->get('id');
 
 					if($rules['own_entries'] == 1) {
 						// Only get the ID's of the current author to begin with:
@@ -428,7 +428,7 @@ Class extension_author_roles extends Extension
 	public function makePreAdjustements($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 
@@ -493,7 +493,7 @@ Class extension_author_roles extends Extension
 	private function adjustEntryEditor($context, $callback) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 
@@ -580,7 +580,7 @@ Class extension_author_roles extends Extension
 	 */
 	private function getCurrentAuthorRoleData() {
 		if(Administration::instance()->isLoggedIn()) {
-			$id_author = Administration::instance()->Author->get('id');
+			$id_author = Administration::instance()->Author()->get('id');
 			$id_role   = $this->getAuthorRole($id_author);
 
 			if($id_role != false) {
@@ -601,7 +601,7 @@ Class extension_author_roles extends Extension
 	public function modifyAreas($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::instance()->Author()->isDeveloper()) {
 			return;
 		}
 
@@ -622,7 +622,7 @@ Class extension_author_roles extends Extension
 	 *  The context
 	 */
 	public function saveAuthorRole($context) {
-		if(Administration::instance()->Author->isDeveloper()) {
+		if(Administration::instance()->Author()->isDeveloper()) {
 			$id_role = intval($_POST['fields']['role']);
 			$id_author = $context['author']->get('id');
 

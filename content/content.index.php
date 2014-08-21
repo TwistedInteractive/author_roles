@@ -21,7 +21,7 @@
 		 */
 		public function build($context)
 		{
-			if(Administration::instance()->Author->isDeveloper()) {
+			if(Administration::instance()->Author()->isDeveloper()) {
 				if($_POST['with-selected'] == 'delete' && is_array($_POST['items']))
 				{
 					foreach($_POST['items'] as $id_role => $value)
@@ -99,8 +99,12 @@
 			
 			// Create the table element:
 			$table = Widget::Table(
-				Widget::TableHead($tableHead), null, 
-				Widget::TableBody($tableBody), 'selectable'
+				Widget::TableHead($tableHead),
+				NULL,
+				Widget::TableBody($tableBody),
+				'selectable',
+				null,
+				array('role' => 'directory', 'aria-labelledby' => 'symphony-subheading', 'data-interactive' => 'data-interactive')
 			);
 			$this->Form->appendChild($table);
 
