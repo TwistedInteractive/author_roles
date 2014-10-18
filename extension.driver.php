@@ -7,10 +7,10 @@ Class extension_author_roles extends Extension
 		return array(
 			'name' => 'Author Roles',
 			'version' => '1.3',
-			'release-date' => '2012-10-04',
+			'release-date' => '2014-10-18',
 			'author' => array(
-				'name' => 'Dario Faniglione',
-				'website' => 'http://dario.faniglione.com'),
+				'name' => 'Twisted Interactive',
+				'website' => 'http://www.twisted.nl'),
 			'description' => 'Author Roles for Symphony 2.5 and above'
 		);
 	}
