@@ -256,6 +256,7 @@ Class extension_author_roles extends Extension
 					$children = current($context['oPage']->Context->getChildrenByName('ul'))->getChildrenByName('li');
 
 					foreach($children as $key => $child) {
+						$child = $child->getValue();
 						if(strpos($child->getValue(),__('Create New')) !== false) {
 							$value = $child->getValue();
 							$child->setValue('<span>'.strip_tags(str_replace(__('Create New'), '', $value)).'</span><span class="create" />');
