@@ -79,7 +79,7 @@ Class extension_author_roles extends Extension
 	public function extendNavigation($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -153,7 +153,7 @@ Class extension_author_roles extends Extension
 	 *  The context, providing the form and the author object
 	 */
 	public function addRolePicker($context) {
-		if(Administration::instance()->Author->isDeveloper()) {
+        //		if(Administration::instance()->Author->isDeveloper()) {
 			$group = new XMLElement('fieldset');
 			$group->setAttribute('class', 'settings');
 			$group->appendChild(new XMLElement('legend', __('Author Role')));
@@ -191,7 +191,7 @@ Class extension_author_roles extends Extension
 
 				$i++;
 			}
-		}
+            //}
 	}
 
 	/**
@@ -230,9 +230,11 @@ Class extension_author_roles extends Extension
 	 * @return mixed
 	 */
 	private function adjustIndex($context, $callback) {
+
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+        //print_r($data);
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -427,8 +429,8 @@ Class extension_author_roles extends Extension
 	 */
 	public function makePreAdjustements($context) {
 		$data = $this->getCurrentAuthorRoleData();
-
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+        //print_r(Administration::Author());
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -492,10 +494,7 @@ Class extension_author_roles extends Extension
 	 */
 	private function adjustEntryEditor($context, $callback) {
 		$data = $this->getCurrentAuthorRoleData();
-
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
-			return;
-		}
+        if($data == false) return;
 
 		// Set the hidden fields:
 		$hiddenFields = array();
@@ -580,9 +579,8 @@ Class extension_author_roles extends Extension
 	 */
 	private function getCurrentAuthorRoleData() {
 		if(Administration::instance()->isLoggedIn()) {
-			$id_author = Administration::instance()->Author->get('id');
+            $id_author = Administration::Author()->get('id');
 			$id_role   = $this->getAuthorRole($id_author);
-
 			if($id_role != false) {
 				$data = $this->getData($id_role);
 				return $data;
@@ -601,7 +599,7 @@ Class extension_author_roles extends Extension
 	public function modifyAreas($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -622,7 +620,7 @@ Class extension_author_roles extends Extension
 	 *  The context
 	 */
 	public function saveAuthorRole($context) {
-		if(Administration::instance()->Author->isDeveloper()) {
+        //		if(Administration::instance()->Author->isDeveloper()) { //FIX
 			$id_role = intval($_POST['fields']['role']);
 			$id_author = $context['author']->get('id');
 
@@ -638,7 +636,7 @@ Class extension_author_roles extends Extension
 				// Insert new role:
 				Symphony::Database()->insert(array('id_role'=>$id_role, 'id_author'=>$id_author), 'tbl_author_roles_authors');
 			}
-		}
+            //}
 	}
 
 	/**
@@ -882,8 +880,8 @@ Class extension_author_roles extends Extension
 		Symphony::Database()->query("
 			CREATE TABLE IF NOT EXISTS `tbl_author_roles_fields` (
 				`id` INT(11) unsigned NOT NULL auto_increment,
-				`id_role` INT(255) unsigned NOT NULL,
-				`id_field` INT(255) unsigned NOT NULL,
+                `id_role` INT(255) unsigned NOT NULL,
+                `id_field` INT(255) unsigned NOT NULL,
 				`hidden` TINYINT(1) unsigned NOT NULL,
 				PRIMARY KEY (`id`),
 				KEY `id_role` (`id_role`),
