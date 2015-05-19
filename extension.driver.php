@@ -201,7 +201,6 @@ Class extension_author_roles extends Extension
 	 */
 	public function checkCallback($context) {
 		$callback = Symphony::Engine()->getPageCallback();
-
 		// Perform an action according to the callback:
 		switch($callback['driver']) {
 			case 'publish' :
@@ -233,8 +232,7 @@ Class extension_author_roles extends Extension
 
 		$data = $this->getCurrentAuthorRoleData();
 
-        //print_r($data);
-		if($data == false || Administration::Author()->isDeveloper()) {
+	if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -265,10 +263,11 @@ Class extension_author_roles extends Extension
 					}
 				}
 
+
 				if($rules['own_entries'] == 1 || $rules['edit'] == 0 || $rules['delete'] == 0 || $rules['use_filter'] == 1) {
 					// For only show entries created by this author:
 					// Get a list of entry id's created by this author:
-					$id_author = Administration::instance()->Author->get('id');
+					$id_author = Administration::Author()->get('id');
 
 					if($rules['own_entries'] == 1) {
 						// Only get the ID's of the current author to begin with:
@@ -369,30 +368,33 @@ Class extension_author_roles extends Extension
 										$child = self::findChildren($formChild,'select');
 										$child = $child[0];
 
-										$newSelect = new XMLElement('select', null, $child->getAttributes());
+                                        $children=($child)?$child->getAttributes():array();
+                                        $newSelect = new XMLElement('select', null, $children); 
 
-										foreach($child->getChildren() as $selectChild) {
+										foreach($children as $selectChild) {
 											// See if delete is allowed:
-											if($selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1) {
-												$newSelect->appendChild($selectChild);
-											}
-											elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
-												// Check if the field that is edited is not a hidden field, because then editing is not allowed:
-												$optGroupChildren = $selectChild->getChildren();
-
-												if(!empty($optGroupChildren)) {
-													$value = $optGroupChildren[0]->getAttribute('value');
-
-													$a = explode('-', str_replace('toggle-', '', $value));
-
-													if(!in_array($a[0], $hiddenFields)) {
-														$newSelect->appendChild($selectChild);
-													}
-												}
-											}
-											elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
-												$newSelect->appendChild($selectChild);
-											}
+                                            if(is_object($selectChild)){
+                                                if( $selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1) {
+                                                    $newSelect->appendChild($selectChild);
+                                                }
+                                                elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
+                                                    // Check if the field that is edited is not a hidden field, because then editing is not allowed:
+                                                    $optGroupChildren = $selectChild->getChildren();
+                                                    
+                                                    if(!empty($optGroupChildren)) {
+                                                        $value = $optGroupChildren[0]->getAttribute('value');
+                                                        
+                                                        $a = explode('-', str_replace('toggle-', '', $value));
+                                                        
+                                                        if(!in_array($a[0], $hiddenFields)) {
+                                                            $newSelect->appendChild($selectChild);
+                                                        }
+                                                    }
+                                                }
+                                                elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
+                                                    $newSelect->appendChild($selectChild);
+                                                }
+                                            }
 										}
 
 										// if the new select has only one entry,
@@ -429,7 +431,6 @@ Class extension_author_roles extends Extension
 	 */
 	public function makePreAdjustements($context) {
 		$data = $this->getCurrentAuthorRoleData();
-        //print_r(Administration::Author());
 		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
@@ -456,15 +457,18 @@ Class extension_author_roles extends Extension
 			$names = explode(',', $names);
 		}
 
-		$children = array();
 
-		foreach($element->getChildren() as $child) {
-			$children = array_merge($children, self::findChildren($child,$names));
-
-			if(in_array($child->getName(), $names )) {
-				$children[] = $child;
-			}
-		}
+        $children = array();
+        if(is_object($element)){
+            foreach($element->getChildren() as $child) {
+                if(!is_string($child)){
+                    $children = array_merge($children, self::findChildren($child,$names));
+                    if(in_array($child->getName(), $names )) {
+                            $children[] = $child;
+                    }
+                }
+            }
+        }
 
 		return $children;
 	}
@@ -476,7 +480,6 @@ Class extension_author_roles extends Extension
 		foreach($parent->getChildren() as $position => $oldChild) {
 			if($oldChild->getName() == $child->getName()) {
 				$parent->replaceChildAt($position,$child);
-
 				return true;
 			}
 
@@ -703,7 +706,6 @@ Class extension_author_roles extends Extension
 
 			// Get sections from the section manager:
 			$availableSections = SectionManager::fetch();
-//			print_r($availableSections);
 
 			// The associated sections:
 			$sections = Symphony::Database()->fetch('
