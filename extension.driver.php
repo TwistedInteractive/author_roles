@@ -79,7 +79,7 @@ Class extension_author_roles extends Extension
 	public function extendNavigation($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -153,7 +153,7 @@ Class extension_author_roles extends Extension
 	 *  The context, providing the form and the author object
 	 */
 	public function addRolePicker($context) {
-		if(Administration::instance()->Author->isDeveloper()) {
+        //		if(Administration::instance()->Author->isDeveloper()) {
 			$group = new XMLElement('fieldset');
 			$group->setAttribute('class', 'settings');
 			$group->appendChild(new XMLElement('legend', __('Author Role')));
@@ -191,7 +191,7 @@ Class extension_author_roles extends Extension
 
 				$i++;
 			}
-		}
+            //}
 	}
 
 	/**
@@ -201,7 +201,6 @@ Class extension_author_roles extends Extension
 	 */
 	public function checkCallback($context) {
 		$callback = Symphony::Engine()->getPageCallback();
-
 		// Perform an action according to the callback:
 		switch($callback['driver']) {
 			case 'publish' :
@@ -230,9 +229,10 @@ Class extension_author_roles extends Extension
 	 * @return mixed
 	 */
 	private function adjustIndex($context, $callback) {
+
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+	if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -263,10 +263,11 @@ Class extension_author_roles extends Extension
 					}
 				}
 
+
 				if($rules['own_entries'] == 1 || $rules['edit'] == 0 || $rules['delete'] == 0 || $rules['use_filter'] == 1) {
 					// For only show entries created by this author:
 					// Get a list of entry id's created by this author:
-					$id_author = Administration::instance()->Author->get('id');
+					$id_author = Administration::Author()->get('id');
 
 					if($rules['own_entries'] == 1) {
 						// Only get the ID's of the current author to begin with:
@@ -367,30 +368,33 @@ Class extension_author_roles extends Extension
 										$child = self::findChildren($formChild,'select');
 										$child = $child[0];
 
-										$newSelect = new XMLElement('select', null, $child->getAttributes());
+                                        $children=($child)?$child->getAttributes():array();
+                                        $newSelect = new XMLElement('select', null, $children); 
 
-										foreach($child->getChildren() as $selectChild) {
+										foreach($children as $selectChild) {
 											// See if delete is allowed:
-											if($selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1) {
-												$newSelect->appendChild($selectChild);
-											}
-											elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
-												// Check if the field that is edited is not a hidden field, because then editing is not allowed:
-												$optGroupChildren = $selectChild->getChildren();
-
-												if(!empty($optGroupChildren)) {
-													$value = $optGroupChildren[0]->getAttribute('value');
-
-													$a = explode('-', str_replace('toggle-', '', $value));
-
-													if(!in_array($a[0], $hiddenFields)) {
-														$newSelect->appendChild($selectChild);
-													}
-												}
-											}
-											elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
-												$newSelect->appendChild($selectChild);
-											}
+                                            if(is_object($selectChild)){
+                                                if( $selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1) {
+                                                    $newSelect->appendChild($selectChild);
+                                                }
+                                                elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
+                                                    // Check if the field that is edited is not a hidden field, because then editing is not allowed:
+                                                    $optGroupChildren = $selectChild->getChildren();
+                                                    
+                                                    if(!empty($optGroupChildren)) {
+                                                        $value = $optGroupChildren[0]->getAttribute('value');
+                                                        
+                                                        $a = explode('-', str_replace('toggle-', '', $value));
+                                                        
+                                                        if(!in_array($a[0], $hiddenFields)) {
+                                                            $newSelect->appendChild($selectChild);
+                                                        }
+                                                    }
+                                                }
+                                                elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
+                                                    $newSelect->appendChild($selectChild);
+                                                }
+                                            }
 										}
 
 										// if the new select has only one entry,
@@ -427,8 +431,7 @@ Class extension_author_roles extends Extension
 	 */
 	public function makePreAdjustements($context) {
 		$data = $this->getCurrentAuthorRoleData();
-
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -454,15 +457,18 @@ Class extension_author_roles extends Extension
 			$names = explode(',', $names);
 		}
 
-		$children = array();
 
-		foreach($element->getChildren() as $child) {
-			$children = array_merge($children, self::findChildren($child,$names));
-
-			if(in_array($child->getName(), $names )) {
-				$children[] = $child;
-			}
-		}
+        $children = array();
+        if(is_object($element)){
+            foreach($element->getChildren() as $child) {
+                if(!is_string($child)){
+                    $children = array_merge($children, self::findChildren($child,$names));
+                    if(in_array($child->getName(), $names )) {
+                            $children[] = $child;
+                    }
+                }
+            }
+        }
 
 		return $children;
 	}
@@ -474,7 +480,6 @@ Class extension_author_roles extends Extension
 		foreach($parent->getChildren() as $position => $oldChild) {
 			if($oldChild->getName() == $child->getName()) {
 				$parent->replaceChildAt($position,$child);
-
 				return true;
 			}
 
@@ -492,10 +497,7 @@ Class extension_author_roles extends Extension
 	 */
 	private function adjustEntryEditor($context, $callback) {
 		$data = $this->getCurrentAuthorRoleData();
-
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
-			return;
-		}
+        if($data == false) return;
 
 		// Set the hidden fields:
 		$hiddenFields = array();
@@ -580,9 +582,8 @@ Class extension_author_roles extends Extension
 	 */
 	private function getCurrentAuthorRoleData() {
 		if(Administration::instance()->isLoggedIn()) {
-			$id_author = Administration::instance()->Author->get('id');
+            $id_author = Administration::Author()->get('id');
 			$id_role   = $this->getAuthorRole($id_author);
-
 			if($id_role != false) {
 				$data = $this->getData($id_role);
 				return $data;
@@ -601,7 +602,7 @@ Class extension_author_roles extends Extension
 	public function modifyAreas($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Administration::instance()->Author->isDeveloper()) {
+		if($data == false || Administration::Author()->isDeveloper()) {
 			return;
 		}
 
@@ -622,7 +623,7 @@ Class extension_author_roles extends Extension
 	 *  The context
 	 */
 	public function saveAuthorRole($context) {
-		if(Administration::instance()->Author->isDeveloper()) {
+        //		if(Administration::instance()->Author->isDeveloper()) { //FIX
 			$id_role = intval($_POST['fields']['role']);
 			$id_author = $context['author']->get('id');
 
@@ -638,7 +639,7 @@ Class extension_author_roles extends Extension
 				// Insert new role:
 				Symphony::Database()->insert(array('id_role'=>$id_role, 'id_author'=>$id_author), 'tbl_author_roles_authors');
 			}
-		}
+            //}
 	}
 
 	/**
@@ -705,7 +706,6 @@ Class extension_author_roles extends Extension
 
 			// Get sections from the section manager:
 			$availableSections = SectionManager::fetch();
-//			print_r($availableSections);
 
 			// The associated sections:
 			$sections = Symphony::Database()->fetch('
@@ -882,8 +882,8 @@ Class extension_author_roles extends Extension
 		Symphony::Database()->query("
 			CREATE TABLE IF NOT EXISTS `tbl_author_roles_fields` (
 				`id` INT(11) unsigned NOT NULL auto_increment,
-				`id_role` INT(255) unsigned NOT NULL,
-				`id_field` INT(255) unsigned NOT NULL,
+                `id_role` INT(255) unsigned NOT NULL,
+                `id_field` INT(255) unsigned NOT NULL,
 				`hidden` TINYINT(1) unsigned NOT NULL,
 				PRIMARY KEY (`id`),
 				KEY `id_role` (`id_role`),
