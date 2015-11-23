@@ -21,7 +21,7 @@
 		 */
 		public function build($context)
 		{
-			if(Administration::instance()->Author->isDeveloper()) {
+			if(Administration::instance()->Author()->isDeveloper()) {
 				if($_POST['with-selected'] == 'delete' && is_array($_POST['items']))
 				{
 					foreach($_POST['items'] as $id_role => $value)
