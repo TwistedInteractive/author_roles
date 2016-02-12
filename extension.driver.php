@@ -253,12 +253,13 @@ Class extension_author_roles extends Extension
 				// Check if there are rules:
 				if($rules['create'] == 0) {
 					// It is not allowed to create new items:
-					$children = current($context['oPage']->Context->getChildrenByName('ul'))->getChildrenByName('li');
+					$topMenu = current($context['oPage']->Context->getChildrenByName('ul'));
+					$children = $topMenu->getChildrenByName('li');
 
 					foreach($children as $key => $child) {
-						if(strpos($child->getValue(),__('Create New')) !== false) {
-							$value = $child->getValue();
-							$child->setValue('<span>'.strip_tags(str_replace(__('Create New'), '', $value)).'</span><span class="create" />');
+						var_dump($child->getValue()->getValue());
+						if(strpos($child->getValue()->getValue(),__('Create New')) !== false) {
+							$topMenu->removeChildAt($key);
 						}
 					}
 				}
@@ -456,7 +457,11 @@ Class extension_author_roles extends Extension
 
 		$children = array();
 
-		foreach($element->getChildren() as $child) {
+		if (!is_object($element)){
+			return $children;
+		}
+
+		foreach($element->getIterator() as $child) {
 			$children = array_merge($children, self::findChildren($child,$names));
 
 			if(in_array($child->getName(), $names )) {
@@ -471,7 +476,7 @@ Class extension_author_roles extends Extension
 	// name matches the name of the second argument with
 	// the second argument
 	private static function replaceChild($parent, $child) {
-		foreach($parent->getChildren() as $position => $oldChild) {
+		foreach($parent->getIterator() as $position => $oldChild) {
 			if($oldChild->getName() == $child->getName()) {
 				$parent->replaceChildAt($position,$child);
 
