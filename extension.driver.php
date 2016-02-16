@@ -66,6 +66,11 @@ Class extension_author_roles extends Extension
 				'delegate' => 'EntryPreDelete',
 				'callback' => 'entryPreDelete'
 			),
+			array(
+				'page' => '/system/preferences/',
+				'delegate' => 'AddCustomPreferenceFieldsets',
+				'callback' => 'appendPreferences'
+			),
 		);
 	}
 
@@ -83,7 +88,7 @@ Class extension_author_roles extends Extension
 
 		$canAccess = true;
 
-		$fieldId = FieldManager::fetchFieldIDFromElementName('authors',$sectionId);
+		$fieldId = FieldManager::fetchFieldIDFromElementName((string)Symphony::Configuration()->get('author_field', 'author_roles'),$sectionId);
 		// $field = FieldManager::fetch($fieldId);
 
 		$fieldType = FieldManager::fetchFieldTypeFromID($fieldId);
@@ -367,7 +372,7 @@ Class extension_author_roles extends Extension
 					//if section has field Author -- defined by config
 					// $sectionObject = SectionManager::fetch($id_section);
 					
-					$fieldId = FieldManager::fetchFieldIDFromElementName('authors',$id_section);
+					$fieldId = FieldManager::fetchFieldIDFromElementName((string)Symphony::Configuration()->get('author_field', 'author_roles'),$id_section);
 					$field = FieldManager::fetch($fieldId);
 
 					$fieldType = FieldManager::fetchFieldTypeFromID($fieldId);
@@ -1031,6 +1036,24 @@ Class extension_author_roles extends Extension
 		else {
 			return false;
 		}
+	}
+
+	public function appendPreferences($context){
+		$group = new XMLElement('fieldset',null,array('class'=>'settings'));
+		$group->appendChild(new XMLElement('legend', 'Author Roles'));
+
+							
+		$div = new XMLElement('div',null,array('class'=>'group'));
+		$label = Widget::Label();
+		$input = Widget::Input("settings[author_roles][author_field]", (string)Symphony::Configuration()->get('author_field', 'author_roles'), 'text');
+		$label->setValue(__('Author Field Handle') . $input->generate());
+		$div->appendChild($label);
+		$div->appendChild(new XMLElement('p','Provide an `author` field handle which is used to detect the author instead of creator of the Symphony entry.',array('class'=>'help')));
+		
+		$group->appendChild($div);
+
+		// Append preferences
+		$context['wrapper']->appendChild($group);
 	}
 
 	/**

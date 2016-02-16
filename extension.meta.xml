@@ -14,7 +14,7 @@
 		<author>
 			<name github="mazedigital">Maze Digital</name>
 			<website>http://maze.digital</website>
-			<email>jon@maze.digital</website>
+			<email>jon@maze.digital</email>
 		</author>
 	</authors>
 	<releases>
@@ -35,6 +35,10 @@
 				- Entry edit now checks that the user has view/edit permissions before loading the page
 				- User is given an entry/section not found if they are not allowed to view/edit the said entry/section
 				- Similar Errors are thrown when trying to create, edit and delete entries without the necessary permissions
+				- Added ability to use custom field to determine Author
+					- Author field uses the author id
+					- All other fields match the author name with the value
+					- Author field name has to be consistent across all sections
 		</release>
 	</releases>
 </extension>
