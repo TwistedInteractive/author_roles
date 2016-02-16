@@ -1,19 +1,6 @@
 <?php
 Class extension_author_roles extends Extension
 {
-	// About this extension:
-	public function about()
-	{
-		return array(
-			'name' => 'Author Roles',
-			'version' => '1.2',
-			'release-date' => '2012-10-04',
-			'author' => array(
-				'name' => 'Twisted Interactive',
-				'website' => 'http://www.twisted.nl'),
-			'description' => 'Author Roles for Symphony 2.2 and above'
-		);
-	}
 
 	// Set the delegates:
 	public function getSubscribedDelegates()
@@ -50,18 +37,411 @@ Class extension_author_roles extends Extension
 				'callback' => 'checkCallback'
 			),
 			array(
-				'page' => '/backend/',
-				'delegate' => 'InitaliseAdminPageHead',
-				'callback' => 'makePreAdjustements'
-			),
-			array(
 				'page' => '/system/authors/',
 				'delegate' => 'AddDefaultAuthorAreas',
 				'callback' => 'modifyAreas'
-			)
+			),
+			array(
+				'page' => '/publish/',
+				'delegate' => 'AdjustPublishFiltering',
+				'callback' => 'adjustPublishFiltering'
+			),
+			array(
+				'page' => '/publish/edit/',
+				'delegate' => 'EntryPreRender',
+				'callback' => 'entryPreRender'
+			),
+			array(
+				'page' => '/publish/edit/',
+				'delegate' => 'EntryPreEdit',
+				'callback' => 'entryPreEdit'
+			),
+			array(
+				'page' => '/publish/new/',
+				'delegate' => 'EntryPreCreate',
+				'callback' => 'entryPreCreate'
+			),
+			array(
+				'page' => '/publish/',
+				'delegate' => 'EntryPreDelete',
+				'callback' => 'entryPreDelete'
+			),
 		);
 	}
 
+	/**
+	 * Check if the current user is the Author of the entry
+	 * @param $entry - the entry to be checked
+	 * @param $rules - the rules applying to this section
+	 * @return boolean
+	 */
+	private function isOwnEntry($entry,$rules){
+		$sectionId = $entry->get('section_id');
+
+		$authorId = Symphony::Author()->get('id');
+		$authorName = Symphony::Author()->get('first_name') . ' ' . Symphony::Author()->get('last_name');
+
+		$canAccess = true;
+
+		$fieldId = FieldManager::fetchFieldIDFromElementName('authors',$sectionId);
+		// $field = FieldManager::fetch($fieldId);
+
+		$fieldType = FieldManager::fetchFieldTypeFromID($fieldId);
+
+		if ($field){
+			
+			$fieldData = $entry->getData($fieldId);
+
+			if ($fieldType == 'author'){ 
+				//use symphony author
+				$canAccess = ($fieldData['author_id'] == $authorId);
+			} else {
+				$fieldValue = $fieldData['value'];
+				if (!is_array($fieldValue)){
+					$fieldValue = array($fieldValue);
+				}
+				$fieldValue = array_map('strtolower', $fieldValue);
+
+				if ( in_array(strtolower($authorName), $fieldValue)){
+					$canAccess = true;
+				} else {
+					$canAccess = false;
+				}
+			}
+		} else {
+			//use symphony author
+			$canAccess  = ($entry->get('author_id') == $authorId);
+		}
+
+		return $canAccess;
+	}
+
+	/**
+	 * Check if the rules permit or deny access to the entry id
+	 * @param $entryId - the entry id to be checked
+	 * @param $rules - the rules applying to this section
+	 * @return boolean
+	 */
+	private function filterCanAccess($entryId,$rules){
+		$rule = explode(':', $rules['filter_rule']);
+
+		$canAccess = true;
+
+		if(count($rule) == 2) {
+			// Valid filter, now get the ID's:
+			$filteredIDs = array();
+			$action = $rule[0];
+			$idsArr = explode(',', $rule[1]);
+
+			foreach($idsArr as $idExpr) {
+				$a = explode('-', trim($idExpr));
+
+				if(count($a)==1) {
+					// Regular ID
+					$filteredIDs[] = $a[0];
+				}
+				elseif(count($a)==2) {
+					// Range
+					$from = $a[0];
+					$to   = $a[1];
+
+					if($to >= $from) {
+						for($i = $from; $i <= $to; $i++){
+							$filteredIDs[] = $i;
+						}
+					}
+				}
+			}
+
+			switch($action) {
+				case 'show' :
+					// Only show the given ids.
+					if ( in_array($entryId, $filteredIDs)){
+						$canAccess = true;
+					} else {
+						$canAccess = false;
+					}
+					break;
+				case 'hide' :
+					// Only show entries which do not have the given ids.
+					if ( !in_array($entryId, $filteredIDs)){
+						$canAccess = true;
+					} else {
+						$canAccess = false;
+					}
+					break;
+			}
+		}
+
+		return $canAccess;
+	}
+
+	/**
+	 * Check that the current user has access prior to deleting an entry
+	 */
+	public function entryPreDelete($context) {
+		$data = $this->getCurrentAuthorRoleData();
+
+		if($data == false || Symphony::Author()->isDeveloper()) {
+			return;
+		}
+
+		$section = Symphony::Engine()->getPageCallback()['context']['section_handle'];
+
+		foreach($data['sections'] as $id_section => $rules) {
+			if($rules['handle'] == $section) {
+
+				$canAccess = true;
+
+				if($rules['delete'] == 0) {
+					$canAccess = false;
+				}
+				
+				if ( !$canAccess ){
+					//throw custom error if access to entry is not allowed
+					Administration::instance()->throwCustomError(
+						__('Restricted Access'),
+						__('You are not allowed to delete entries in this section'),
+						Page::HTTP_STATUS_NOT_FOUND
+					);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check that the current user has access prior to showing creating an entry
+	 */
+	public function entryPreCreate($context) {
+
+		$data = $this->getCurrentAuthorRoleData();
+
+		if($data == false || Symphony::Author()->isDeveloper()) {
+			return;
+		}
+
+		$section = Symphony::Engine()->getPageCallback()['context']['section_handle'];
+
+		foreach($data['sections'] as $id_section => $rules) {
+			if($rules['handle'] == $section) {
+
+				$canAccess = true;
+
+				if($rules['create'] == 0) {
+					$canAccess = false;
+				}
+				
+				if ( !$canAccess ){
+					//throw custom error if access to entry is not allowed
+					Administration::instance()->throwCustomError(
+						__('Restricted Access'),
+						__('You are not allowed to create entries in this section'),
+						Page::HTTP_STATUS_NOT_FOUND
+					);
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Check that the current user has access prior to saving entry edits
+	 */
+	public function entryPreEdit($context) {
+
+		$data = $this->getCurrentAuthorRoleData();
+
+		if($data == false || Symphony::Author()->isDeveloper()) {
+			return;
+		}
+
+		$section = Symphony::Engine()->getPageCallback()['context']['section_handle'];
+
+		foreach($data['sections'] as $id_section => $rules) {
+			if($rules['handle'] == $section) {
+
+				$canAccess = true;
+
+				if($rules['edit'] == 0) {
+					$canAccess = false;
+				}
+
+				if($rules['own_entries'] == 1 && $canAccess) {
+					$canAccess = $this->isOwnEntry();
+				}
+
+				// Add or remove ID's from the filter:
+				if($rules['use_filter'] == 1 && $canAccess) {
+					$canAccess = $this->filterCanAccess($context['entry']->get('id'),$rules);
+				}
+				
+				if ( !$canAccess ){
+					//throw custom error if access to entry is not allowed
+					Administration::instance()->throwCustomError(
+						__('Restricted Access'),
+						__('You do not have permissions to edit entry %s.', array($context['entry']->get('id'))),
+						Page::HTTP_STATUS_NOT_FOUND
+					);
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Check that the current user has view or edit access prior to showing the entry edit screen
+	 */
+	public function entryPreRender($context) {
+
+		$data = $this->getCurrentAuthorRoleData();
+
+		if($data == false || Symphony::Author()->isDeveloper()) {
+			return;
+		}
+
+		$section = Symphony::Engine()->getPageCallback()['context']['section_handle'];
+
+		foreach($data['sections'] as $id_section => $rules) {
+			if($rules['handle'] == $section) {
+
+				$canAccess = true;
+
+				if($rules['visible'] == 0 && $rules['edit'] == 0) {
+					$canAccess = false;
+				}
+
+				if($rules['own_entries'] == 1 && $canAccess) {
+					$canAccess = $this->isOwnEntry();
+				}
+
+				// Add or remove ID's from the filter:
+				if($rules['use_filter'] == 1 && $canAccess) {
+					$canAccess = $this->filterCanAccess($context['entry']->get('id'),$rules);
+				}
+				
+				if ( !$canAccess ){
+					//throw custom error if access to entry is not allowed
+					Administration::instance()->throwCustomError(
+						__('Unknown Entry'),
+						__('The Entry, %s, could not be found.', array($context['entry']->get('id'))),
+						Page::HTTP_STATUS_NOT_FOUND
+					);
+				}
+			}
+
+		}
+		// var_dump($context);die;
+	}
+
+	/**
+	* Ensure that any required filtering is done to show only entries which the user has access to in the list views
+	*/
+	public function adjustPublishFiltering($context) {
+		// var_dump($context);die;
+
+		$authorId = Symphony::Author()->get('id');
+		$authorName = Symphony::Author()->get('first_name') . ' ' . Symphony::Author()->get('last_name');
+
+		$data = $this->getCurrentAuthorRoleData();
+
+		if($data == false || Symphony::Author()->isDeveloper()) {
+			return;
+		}
+
+		$section = Symphony::Engine()->getPageCallback()['context']['section_handle'];
+
+		foreach($data['sections'] as $id_section => $rules) {
+			if($rules['handle'] == $section) {
+
+				if($rules['visible'] == 0) {
+					Administration::instance()->throwCustomError(
+						__('Unknown Section'),
+						__('The Section, %s, could not be found.', array($section)),
+						Page::HTTP_STATUS_NOT_FOUND
+					);
+				}
+
+				if($rules['own_entries'] == 1) {
+					// Only get the ID's of the current author to begin with:
+
+					//if section has field Author -- defined by config
+					// $sectionObject = SectionManager::fetch($id_section);
+					
+					$fieldId = FieldManager::fetchFieldIDFromElementName('authors',$id_section);
+					$field = FieldManager::fetch($fieldId);
+
+					$fieldType = FieldManager::fetchFieldTypeFromID($fieldId);
+
+					if ($field){
+						$context['joins'] .= " LEFT JOIN `tbl_entries_data_{$fieldId}` as `a{$fieldId}` on `e`.`id` = `a{$fieldId}`.`entry_id` ";
+						if ($fieldType == 'author'){ 
+							//use symphony author
+							$context['where'] .= " AND `a{$fieldId}`.`author_id` = '{$authorId}'";
+						} else {
+							$context['where'] .= " AND `a{$fieldId}`.`value` = '{$authorName}'";
+						}
+					} else {
+						//use symphony author
+						$context['where'] .= " AND `e`.`author_id` = '{$authorId}'";
+					}
+					// $results = Symphony::Database()->fetch('SELECT `id` FROM `tbl_entries` WHERE `author_id`');
+				}
+
+
+				// Add or remove ID's from the filter:
+				if($rules['use_filter'] == 1) {
+					$rule = explode(':', $rules['filter_rule']);
+
+					if(count($rule) == 2) {
+						// Valid filter, now get the ID's:
+						$filteredIDs = array();
+						$action = $rule[0];
+						$idsArr = explode(',', $rule[1]);
+
+						foreach($idsArr as $idExpr) {
+							$a = explode('-', trim($idExpr));
+
+							if(count($a)==1) {
+								// Regular ID
+								$filteredIDs[] = $a[0];
+							}
+							elseif(count($a)==2) {
+								// Range
+								$from = $a[0];
+								$to   = $a[1];
+
+								if($to >= $from) {
+									for($i = $from; $i <= $to; $i++){
+										$filteredIDs[] = $i;
+									}
+								}
+							}
+						}
+
+						$filteredIDs = MySQL::cleanValue(implode(',',$filteredIDs));
+
+						switch($action) {
+							case 'show' :
+								// Only show the given ids.
+								$context['where'] .= " AND `e`.`id` IN ('{$filteredIDs}')";
+								break;
+							case 'hide' :
+								// Only show entries which do not have the given ids.
+								$context['where'] .= " AND `e`.`id` NOT IN ('{$filteredIDs}')";
+								break;
+						}
+					}
+				}
+
+
+
+			}
+		}
+	}
+
+	/**
+	* Add Author Roles Navigation Items
+	*/
 	public function fetchNavigation() {
 		return array(
 			array(
@@ -230,6 +610,8 @@ Class extension_author_roles extends Extension
 	 * @return mixed
 	 */
 	private function adjustIndex($context, $callback) {
+
+
 		$data = $this->getCurrentAuthorRoleData();
 
 		if($data == false || Symphony::Author()->isDeveloper()) {
@@ -262,187 +644,6 @@ Class extension_author_roles extends Extension
 							$topMenu->removeChildAt($key);
 						}
 					}
-				}
-
-				if($rules['own_entries'] == 1 || $rules['edit'] == 0 || $rules['delete'] == 0 || $rules['use_filter'] == 1) {
-					// For only show entries created by this author:
-					// Get a list of entry id's created by this author:
-					$id_author = Symphony::Author()->get('id');
-
-					if($rules['own_entries'] == 1) {
-						// Only get the ID's of the current author to begin with:
-						$results = Symphony::Database()->fetch('SELECT `id` FROM `tbl_entries` WHERE `author_id` = '.$id_author.';');
-					}
-					else {
-						// Get all the ID's:
-						$results = Symphony::Database()->fetch('SELECT `id` FROM `tbl_entries`;');
-					}
-
-					$ids = array();
-
-					foreach($results as $result)
-					{
-						$ids[] = $result['id'];
-					}
-
-					// Add or remove ID's from the filter:
-					if($rules['use_filter'] == 1) {
-						$rule = explode(':', $rules['filter_rule']);
-
-						if(count($rule) == 2) {
-							// Valid filter, now get the ID's:
-							$filteredIDs = array();
-							$action = $rule[0];
-							$idsArr = explode(',', $rule[1]);
-
-							foreach($idsArr as $idExpr) {
-								$a = explode('-', trim($idExpr));
-
-								if(count($a)==1) {
-									// Regular ID
-									$filteredIDs[] = $a[0];
-								}
-								elseif(count($a)==2) {
-									// Range
-									$from = $a[0];
-									$to   = $a[1];
-
-									if($to >= $from) {
-										for($i = $from; $i <= $to; $i++){
-											$filteredIDs[] = $i;
-										}
-									}
-								}
-							}
-
-							switch($action) {
-								case 'show' :
-									// Only show the given ids. Well that's easy:
-									$ids = $filteredIDs;
-									break;
-								case 'hide' :
-									// Remove the filtered ids from the ids-array:
-									$ids = array_diff($ids, $filteredIDs);
-									break;
-							}
-						}
-					}
-
-					// Now, check each table row:
-					$newContents = new XMLElement('div', null, $context['oPage']->Contents->getAttributes());
-
-					foreach($context['oPage']->Contents->getChildren() as $contentsChild) {
-						if($contentsChild->getName() == 'form') {
-							$newForm = new XMLElement('form', null, $contentsChild->getAttributes());
-
-							foreach($contentsChild->getChildren() as $formChild) {
-								// only show entries created by this author, or which are allowed by the filter:
-								if($formChild->getName() == 'table' && ($rules['own_entries'] == 1 || $rules['use_filter'] == 1)) {
-									$newTable = new XMLElement('table', null, $formChild->getAttributes());
-
-									foreach($formChild->getChildren() as $tableChild) {
-										if($tableChild->getName() == 'tbody') {
-											$newTableBody = new XMLElement('tbody', null, $tableChild->getAttributes());
-
-											foreach($tableChild->getChildren() as $tableRow) {
-												// Check the ID:
-												$id = explode('-', $tableRow->getAttribute('id'));
-
-												if(in_array($id[1], $ids)) {
-													$newTableBody->appendChild($tableRow);
-												}
-											}
-
-											$newTable->appendChild($newTableBody);
-										}
-										else {
-											$newTable->appendChild($tableChild);
-										}
-									}
-
-									$newForm->appendChild($newTable);
-								}
-								elseif($formChild->getName() == 'div' && $formChild->getAttribute('class') == 'actions') {
-									// Only proceed if you can either edit or delete. Otherwise it would have much sense to have an apply-button here...
-									if($rules['delete'] == 1 || $rules['edit'] == 1) {
-										$child = self::findChildren($formChild,'select');
-										$child = $child[0];
-
-										$newSelect = new XMLElement('select', null, $child->getAttributes());
-
-										foreach($child->getChildren() as $selectChild) {
-											// See if delete is allowed:
-											if($selectChild->getAttribute('value') == 'delete' && $rules['delete'] == 1) {
-												$newSelect->appendChild($selectChild);
-											}
-											elseif($selectChild->getName() == 'optgroup' && $rules['edit'] == 1) {
-												// Check if the field that is edited is not a hidden field, because then editing is not allowed:
-												$optGroupChildren = $selectChild->getChildren();
-
-												if(!empty($optGroupChildren)) {
-													$value = $optGroupChildren[0]->getAttribute('value');
-
-													$a = explode('-', str_replace('toggle-', '', $value));
-
-													if(!in_array($a[0], $hiddenFields)) {
-														$newSelect->appendChild($selectChild);
-													}
-												}
-											}
-											elseif($selectChild->getName() == 'option' && $selectChild->getAttribute('value') != 'delete' && ($rules['edit'] == 1 || $rules['delete'] == 1)) {
-												$newSelect->appendChild($selectChild);
-											}
-										}
-
-										// if the new select has only one entry,
-										// it is the dummy entry and we can discard it
-										if($newSelect->getNumberOfChildren() > 1 ) {
-											self::replaceChild($formChild, $newSelect);
-											$newForm->appendChild($formChild);
-										}
-									}
-								}
-								else {
-									$newForm->appendChild($formChild);
-								}
-							}
-
-							$newContents->appendChild($newForm);
-							$context['oPage']->Form = $newForm;
-						}
-						else {
-							$newContents->appendChild($contentsChild);
-						}
-					}
-
-					$context['oPage']->Contents = $newContents;
-				}
-			}
-		}
-	}
-
-	/**
-	 * See if there should be made some adjustments to the current page:
-	 * @param	$context
-	 *  The context
-	 */
-	public function makePreAdjustements($context) {
-		$data = $this->getCurrentAuthorRoleData();
-
-		if($data == false || Symphony::Author()->isDeveloper()) {
-			return;
-		}
-
-		// Check if something needs to be done before anything is done:
-		$callback = Symphony::Engine()->getPageCallback();
-
-		// If the user is only allowed to see his or her own entries, then the configuration should be overwritten to a maximum.
-		if($callback['driver'] == 'publish' && $callback['context']['page'] == 'index') {
-			$section = $callback['context']['section_handle'];
-
-			foreach($data['sections'] as $id_section => $rules) {
-				if($rules['handle'] == $section && $rules['own_entries'] == 1) {
-					Symphony::Configuration()->set('pagination_maximum_rows', PHP_INT_MAX, 'symphony');
 				}
 			}
 		}
@@ -554,12 +755,6 @@ Class extension_author_roles extends Extension
 									}
 								}
 								else {
-									if($rules['edit'] == 0) {
-										foreach(self::findChildren($formChild,'input,select,textarea') as $child) {
-											$child->setAttribute('disabled','disabled');
-										}
-									}
-
 									$newForm->appendChild($formChild);
 								}
 							}

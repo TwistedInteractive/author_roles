@@ -11,6 +11,11 @@
 			<name github="TwistedInteractive">Twisted Interactive</name>
 			<website>http://www.twisted.nl</website>
 		</author>
+		<author>
+			<name github="mazedigital">Maze Digital</name>
+			<website>http://maze.digital</website>
+			<email>jon@maze.digital</website>
+		</author>
 	</authors>
 	<releases>
 		<release version="1.0" date="2011-03-17" min="2.2" max="2.2.5" />
@@ -23,6 +28,13 @@
 		</release>
 		<release version="1.3" date="2015-02-20" min="2.5">
 			Updated compatibility for Symphony 2.5
+		</release>
+		<release version="2.0" date="2016-02-16" min="2.5" max="2.7.x">
+			Re Written Core Access Functionality
+				- Table view now uses filters to narrow down user permissions
+				- Entry edit now checks that the user has view/edit permissions before loading the page
+				- User is given an entry/section not found if they are not allowed to view/edit the said entry/section
+				- Similar Errors are thrown when trying to create, edit and delete entries without the necessary permissions
 		</release>
 	</releases>
 </extension>
