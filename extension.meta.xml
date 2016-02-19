@@ -29,7 +29,7 @@
 		<release version="1.3" date="2015-02-20" min="2.5">
 			Updated compatibility for Symphony 2.5
 		</release>
-		<release version="2.0" date="2016-02-16" min="2.5" max="2.7.x">
+		<release version="2.0" date="2016-02-19" min="2.5" max="2.7.x">
 			Re Written Core Access Functionality
 				- Table view now uses filters to narrow down user permissions
 				- Entry edit now checks that the user has view/edit permissions before loading the page
@@ -39,6 +39,8 @@
 					- Author field uses the author id
 					- All other fields match the author name with the value
 					- Author field name has to be consistent across all sections
+				- Differenciated in between Viewing and Editing own entries, one can now view all but only edit own entries
+				- Added ability to allow Managers to set and have full permissions
 		</release>
 	</releases>
 </extension>

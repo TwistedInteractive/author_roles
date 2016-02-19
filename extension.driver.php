@@ -80,6 +80,16 @@ Class extension_author_roles extends Extension
 	 * @param $rules - the rules applying to this section
 	 * @return boolean
 	 */
+	private function superseedsPermissions(){
+		return Symphony::Author()->isDeveloper() || (Symphony::Author()->isManager() && Symphony::Configuration()->get('manager', 'author_roles') === 'yes');
+	}
+
+	/**
+	 * Check if the current user is the Author of the entry
+	 * @param $entry - the entry to be checked
+	 * @param $rules - the rules applying to this section
+	 * @return boolean
+	 */
 	private function isOwnEntry($entry,$rules){
 		$sectionId = $entry->get('section_id');
 
@@ -187,7 +197,7 @@ Class extension_author_roles extends Extension
 	public function entryPreDelete($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -221,7 +231,7 @@ Class extension_author_roles extends Extension
 
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -256,7 +266,7 @@ Class extension_author_roles extends Extension
 
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -271,7 +281,7 @@ Class extension_author_roles extends Extension
 					$canAccess = false;
 				}
 
-				if($rules['own_entries'] == 1 && $canAccess) {
+				if($rules['edit_own_entries'] == 1 && $canAccess) {
 					$canAccess = $this->isOwnEntry();
 				}
 
@@ -300,7 +310,7 @@ Class extension_author_roles extends Extension
 
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -315,7 +325,7 @@ Class extension_author_roles extends Extension
 					$canAccess = false;
 				}
 
-				if($rules['own_entries'] == 1 && $canAccess) {
+				if($rules['view_own_entries'] == 1 && $canAccess) {
 					$canAccess = $this->isOwnEntry();
 				}
 
@@ -349,7 +359,7 @@ Class extension_author_roles extends Extension
 
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -366,7 +376,7 @@ Class extension_author_roles extends Extension
 					);
 				}
 
-				if($rules['own_entries'] == 1) {
+				if($rules['view_own_entries'] == 1) {
 					// Only get the ID's of the current author to begin with:
 
 					//if section has field Author -- defined by config
@@ -464,7 +474,7 @@ Class extension_author_roles extends Extension
 	public function extendNavigation($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -538,7 +548,7 @@ Class extension_author_roles extends Extension
 	 *  The context, providing the form and the author object
 	 */
 	public function addRolePicker($context) {
-		if(Symphony::Author()->isDeveloper()) {
+		if($this->superseedsPermissions()) {
 			$group = new XMLElement('fieldset');
 			$group->setAttribute('class', 'settings');
 			$group->appendChild(new XMLElement('legend', __('Author Role')));
@@ -619,7 +629,7 @@ Class extension_author_roles extends Extension
 
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -704,7 +714,7 @@ Class extension_author_roles extends Extension
 	private function adjustEntryEditor($context, $callback) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -806,7 +816,7 @@ Class extension_author_roles extends Extension
 	public function modifyAreas($context) {
 		$data = $this->getCurrentAuthorRoleData();
 
-		if($data == false || Symphony::Author()->isDeveloper()) {
+		if($data == false || $this->superseedsPermissions()) {
 			return;
 		}
 
@@ -827,7 +837,7 @@ Class extension_author_roles extends Extension
 	 *  The context
 	 */
 	public function saveAuthorRole($context) {
-		if(Symphony::Author()->isDeveloper()) {
+		if($this->superseedsPermissions()) {
 			$id_role = intval($_POST['fields']['role']);
 			$id_author = $context['author']->get('id');
 
@@ -920,7 +930,8 @@ Class extension_author_roles extends Extension
 					A.`create`,
 					A.`edit`,
 					A.`delete`,
-					A.`own_entries`,
+					A.`view_own_entries`,
+					A.`edit_own_entries`,
 					A.`use_filter`,
 					A.`filter_rule`
 				FROM
@@ -1011,7 +1022,8 @@ Class extension_author_roles extends Extension
 				$insert['create']	= isset($info['create']) ? 1 : 0;
 				$insert['edit']		= isset($info['edit']) ? 1 : 0;
 				$insert['delete']	= isset($info['delete']) ? 1 : 0;
-				$insert['own_entries'] = isset($info['own_entries']) ? 1 : 0;
+				$insert['view_own_entries'] = isset($info['view_own_entries']) ? 1 : 0;
+				$insert['edit_own_entries'] = isset($info['edit_own_entries']) ? 1 : 0;
 				$insert['use_filter']  = isset($info['use_filter']) ? 1 : 0;
 
 				// Filter rule:
@@ -1052,6 +1064,18 @@ Class extension_author_roles extends Extension
 		
 		$group->appendChild($div);
 
+
+		 // Append settings
+        $label = Widget::Label();
+        $input = Widget::Input('settings[author_roles][manager]', 'yes', 'checkbox');
+
+        if (Symphony::Configuration()->get('manager', 'author_roles') === 'yes') {
+            $input->setAttribute('checked', 'checked');
+        }
+
+        $label->setValue($input->generate() . ' ' . __('Managers should not have restricted access and can set permissions'));
+        $group->appendChild($label);
+
 		// Append preferences
 		$context['wrapper']->appendChild($group);
 	}
@@ -1060,6 +1084,8 @@ Class extension_author_roles extends Extension
 	 * Installation
 	 */
 	public function install() {
+		Symphony::Configuration()->set('manager', 'yes', 'author_roles');
+
 		// Roles table:
 		Symphony::Database()->query("
 			CREATE TABLE IF NOT EXISTS `tbl_author_roles` (
@@ -1092,7 +1118,8 @@ Class extension_author_roles extends Extension
 				`create` TINYINT(1) unsigned NOT NULL,
 				`edit` TINYINT(1) unsigned NOT NULL,
 				`delete` TINYINT(1) unsigned NOT NULL,
-				`own_entries` TINYINT(1) unsigned NOT NULL,
+				`view_own_entries` TINYINT(1) unsigned NOT NULL,
+				`edit_own_entries` TINYINT(1) unsigned NOT NULL,
 				`use_filter` TINYINT(1) unsigned NOT NULL,
 				`filter_rule` TEXT NOT NULL,
 				PRIMARY KEY (`id`),
@@ -1136,6 +1163,16 @@ Class extension_author_roles extends Extension
 		if(version_compare($previousVersion, '1.2', '<')) {
 			// Update from pre-1.1 to 1.2:
 			return Symphony::Database()->query('ALTER TABLE  `tbl_author_roles` ADD  `custom_elements` TEXT NULL;');
+		}
+		if(version_compare($previousVersion, '2.0', '<')) {
+			// Update from pre-2.0 to 2.0
+			Symphony::Configuration()->set('manager', 'yes', 'author_roles');
+
+			return Symphony::Database()->query("
+				ALTER TABLE  `tbl_author_roles_sections` ADD `edit_own_entries` TINYINT(1) unsigned NOT NULL;
+				UPDATE `tbl_author_roles_sections` SET `edit_own_entries` = `own_entries`;
+				ALTER TABLE  `tbl_author_roles_sections` CHANGE  `own_entries` `view_own_entries` TINYINT(1) unsigned NOT NULL;
+			");
 		}
 	}
 }

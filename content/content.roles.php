@@ -170,9 +170,16 @@
 				$divEntries = new XMLElement('div', null, array('class'=>'sub entries'));
 				$label = Widget::Label();
 				// check if this checkbox is checked:
-				$attributes = $this->checkSection($id, 'own_entries') == 1 ? array('checked'=>'checked') : null;
-				$input = Widget::Input('section['.$id.'][own_entries]', null, 'checkbox', $attributes);
-				$label->setValue($input->generate() . ' ' . __('Author can view/edit own entries only'));
+				$attributes = $this->checkSection($id, 'view_own_entries') == 1 ? array('checked'=>'checked') : null;
+				$input = Widget::Input('section['.$id.'][view_own_entries]', null, 'checkbox', $attributes);
+				$label->setValue($input->generate() . ' ' . __('Author can view own entries only'));
+				$divEntries->appendChild($label);
+
+				$label = Widget::Label();
+				// check if this checkbox is checked:
+				$attributes = $this->checkSection($id, 'edit_own_entries') == 1 ? array('checked'=>'checked') : null;
+				$input = Widget::Input('section['.$id.'][edit_own_entries]', null, 'checkbox', $attributes);
+				$label->setValue($input->generate() . ' ' . __('Author can edit own entries only'));
 				$divEntries->appendChild($label);
 				
 				$label = Widget::Label();
