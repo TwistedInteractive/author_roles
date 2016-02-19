@@ -282,7 +282,7 @@ Class extension_author_roles extends Extension
 				}
 
 				if($rules['edit_own_entries'] == 1 && $canAccess) {
-					$canAccess = $this->isOwnEntry();
+					$canAccess = $this->isOwnEntry($context('entry'),$rules);
 				}
 
 				// Add or remove ID's from the filter:
@@ -326,7 +326,7 @@ Class extension_author_roles extends Extension
 				}
 
 				if($rules['view_own_entries'] == 1 && $canAccess) {
-					$canAccess = $this->isOwnEntry();
+					$canAccess = $this->isOwnEntry($context('entry'),$rules);
 				}
 
 				// Add or remove ID's from the filter:
