@@ -1,6 +1,6 @@
 <?php
 	require_once(TOOLKIT . '/class.administrationpage.php');
-	
+
 	Class contentExtensionAuthor_rolesIndex extends AdministrationPage
 	{
 		protected $_uri = null;
@@ -21,7 +21,7 @@
 		 */
 		public function build($context)
 		{
-			if(Administration::instance()->Author->isDeveloper()) {
+			if(Administration::instance()->Author()->isDeveloper()) {
 				if($_POST['with-selected'] == 'delete' && is_array($_POST['items']))
 				{
 					foreach($_POST['items'] as $id_role => $value)
@@ -41,7 +41,7 @@
 			$this->setTitle('Symphony &ndash; Roles');
 			$this->__viewIndex();
 		}
-		
+
 		// The Index:
 		public function __viewIndex()
 		{
@@ -51,16 +51,16 @@
 				__('Create New'), $this->_uri.'roles/new/',
 				__('Create a new role'), 'create button'
 			));
-			
+
 			// Set the table head:
 			$tableHead = array(
 				array(__('Role Name'), 'col'),
 				array(__('Authors with this role'), 'col')
 			);
-			
+
 			// Set the table body:
 			$tableBody = array();
-			
+
 			// Fill the table with available roles:
 			$roles = $this->_driver->getRoles();
 			if(empty($roles))
@@ -76,7 +76,7 @@
 					$td  = new XMLElement('td', '<a href="'.$this->_url.'roles/edit/'.$role['id'].'/">'.$role['name'].'</a>');
 					$td->appendChild(Widget::Input('items['.$role['id'].']', NULL, 'checkbox'));
 					$row->appendChild($td);
-					
+
 					// Authors:
 					$authors = $this->_driver->getAuthors($role['id']);
 					if(empty($authors)) {
@@ -96,10 +96,10 @@
 					$tableBody[] = $row;
 				}
 			}
-			
+
 			// Create the table element:
 			$table = Widget::Table(
-				Widget::TableHead($tableHead), null, 
+				Widget::TableHead($tableHead), null,
 				Widget::TableBody($tableBody), 'selectable'
 			);
 			$this->Form->appendChild($table);
