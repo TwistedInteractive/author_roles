@@ -21,7 +21,7 @@
 			to Symphony to make sure the 'Author Roles'-extension is executed as last, after all other extensions have
 			made their possible modifications to the navigation. Read the readme for more details.
 		</release>
-		<release version="1.0" date="2016-05-17" min="2.3">
+		<release version="1.0" date="2016-05-17" min="2.3" max="2.6.7">
 			Updated `...nce()->Author->isD...` to `...nce()->Author()->isD...` per [migration guide](https://github.com/symphonycms/symphony-2/wiki/Migration-Guide-to-2.5-for-Developers#properties).
 		</release>
 	</releases>
