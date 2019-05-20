@@ -17,7 +17,7 @@
 			$this->_driver = Symphony::ExtensionManager()->create('author_roles');
 		}
 		
-		public function build($context)
+		public function build(array $context = Array())
 		{
 			$this->_action = isset($context[0]) ? $context[0] : false;
 			if($this->_action == 'edit' && isset($context[1]) && is_numeric($context[1]))
