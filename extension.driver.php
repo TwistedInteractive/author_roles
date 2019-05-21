@@ -588,12 +588,16 @@ Class extension_author_roles extends Extension {
 	 *  An associated array with all the information you need, or false if no role is assigned
 	 */
 	private function getCurrentAuthorRoleData() {
-		$id_author = Administration::instance()->Author()->get('id');
-		$id_role = $this->getAuthorRole($id_author);
+		if (Administration::instance()->Author()) {
+			$id_author = Administration::instance()->Author()->get('id');
+			$id_role = $this->getAuthorRole($id_author);
 
-		if ($id_role != false) {
-			$data = $this->getData($id_role);
-			return $data;
+			if ($id_role != false) {
+				$data = $this->getData($id_role);
+				return $data;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
