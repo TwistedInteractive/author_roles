@@ -19,9 +19,9 @@
 		 * Build the page
 		 * @param array $context
 		 */
-		public function build($context)
+		public function build(array $context = Array())
 		{
-			if(Administration::instance()->Author->isDeveloper()) {
+			if(Administration::instance()->Author()->isDeveloper()) {
 				if($_POST['with-selected'] == 'delete' && is_array($_POST['items']))
 				{
 					foreach($_POST['items'] as $id_role => $value)
