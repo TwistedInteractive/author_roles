@@ -3,10 +3,13 @@
 Author: Twisted Interactive  
 Website: http://www.twisted.nl
 
+Mantained by: Maze Digital
+Website: http://maze.digital
+
 ## What does this extension do? ##
 
 In short: this extension allows you to set permissions for each author with roles.
-It is the successor of the [Author Section extension](https://github.com/kanduvisla/author_section).
+It is the successor of the Author Section extension
 
 More detailed: The extension allows you to set the following permissions:
 
@@ -43,8 +46,12 @@ you're safe now, otherwise you have to go into the database, look for the `tbl_e
 ID to be the highest number in the table. Don't change the other extensions! After that, edit the `tbl_extensions_delegates`-table
 and change the rows which have `extension_id` set to the old ID, and update them to the new ID. Now everything should work just fine!
 
+### Symphony 3.0
+
+The above hack would no longer be necessary once Symphony 3.0 is released as a [custom order](https://github.com/symphonycms/symphony-2/commit/e6dd9d4611a5a153b1d657e3418b5d34ef381d43) is allowed when setting delegates. If you feel brave you can merge this commit with your install, and make sure that the `tbl_extensions_delegates` table has the new order field. You will still have to 'set' the order value manually in the database but no need to hack the core.
+
 ## Sidenotes ##
 
 - Fields that are set to 'hidden' will be made hidden with JavaScript. This is to ensure that all the data gets send and stored on a POST-action when an entry is saved. However, this could cause some issues with third-party field-types, although these aren't encountered yet.
 - Fields that are required cannot be set to 'hidden', since that would cause an error when trying to store the entry.
-- If you choose to filter entries (by letting an author only show his/her own entries or using the filter), pagination on the publish pages is disabled. This has to be done, because Symphony doesn't have a hook to alter the query used to retreive the entries.
+- Relationships using SBL/Association Field etc are not 'filtered' in this version. So a User can view all entries when linking. Editing entries would still work as per the settings provided to the Author roles. Do not use relationships if you don't want users to see certain related entries.
