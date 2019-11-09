@@ -1159,7 +1159,7 @@ Class extension_author_roles extends Extension
 	 *  The version that is currently installed in this Symphony installation
 	 * @return boolean
 	 */
-	public function update($previousVersion) {
+	public function update($previousVersion = false) {
 		if(version_compare($previousVersion, '1.2', '<')) {
 			// Update from pre-1.1 to 1.2:
 			return Symphony::Database()->query('ALTER TABLE  `tbl_author_roles` ADD  `custom_elements` TEXT NULL;');
